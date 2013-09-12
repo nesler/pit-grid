@@ -45,9 +45,3 @@ th, td {
 input {
   width:75px;
 }
-
-.pitGridContainer {
-  height: 500px;
-  /*width: 100%;*/
-  overflow: auto;
-}

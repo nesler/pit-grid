@@ -78,6 +78,33 @@ app.directive('pitGrid', function($http, $compile, configLoader){
 
         return {top: top, left: left};
       }
+
+      $scope.scrollBarWidth = (function() {
+        /* Taken from http://www.alexandre-gomes.com/?p=115 */
+        var inner = document.createElement('p');
+        inner.style.width = "100%";
+        inner.style.height = "200px";
+
+        var outer = document.createElement('div');
+        outer.style.position = "absolute";
+        outer.style.top = "0px";
+        outer.style.left = "0px";
+        outer.style.visibility = "hidden";
+        outer.style.width = "200px";
+        outer.style.height = "150px";
+        outer.style.overflow = "hidden";
+        outer.appendChild (inner);
+
+        document.body.appendChild (outer);
+        var w1 = inner.offsetWidth;
+        outer.style.overflow = 'scroll';
+        var w2 = inner.offsetWidth;
+        if (w1 == w2) w2 = outer.clientWidth;
+
+        document.body.removeChild (outer);
+
+        return (w1 - w2);
+      })();
     },
     link: function($scope, el, attrs){
       var template = attrs.pitGridTemplate;
@@ -85,12 +112,44 @@ app.directive('pitGrid', function($http, $compile, configLoader){
       // Do this to avoid directives in the template to be compiled before the actual table
       $http.get(template)
         .success(function(htmlTemplate){
+          var maxHeight = (angular.isDefined(attrs.pitGridMaxHeight) ? attrs.pitGridMaxHeight : '100%')
+
           htmlTemplate = $('<div><div class="pitGridContainerButtons"></div><div class="pitGridContainer">' + htmlTemplate + '</div></div>');
           
           htmlTemplate.find('input').attr('ng-disabled', '!editable');
 
           if(attrs.pitGridEditable == 'toggle'){
             htmlTemplate.find('.pitGridContainerButtons').append('<button ng-click="editable = !editable">Can edit: {{editable}}</button>');
+          }
+
+          /*
+            TODO: Impl. http://jsfiddle.net/snNuk/1/
+          */
+
+          if(angular.isDefined(attrs.pitGridEnableFixedColumns)){
+            var lastFixedColumnIndex = htmlTemplate.find('[pit-grid-fixed-column]:last').index()
+                ,mainTable = htmlTemplate.find('table')
+                ,fixedColumnTable = mainTable.clone(true);
+
+            // Remove fixed columns from primary table
+            mainTable.find('th:lt('+(lastFixedColumnIndex+1)+')').remove();
+            mainTable.find('td:lt('+(lastFixedColumnIndex+1)+')').remove();
+            mainTable.addClass('mainTable');
+
+            // Remove non-fixed columns from fixed column table
+            fixedColumnTable.find('th:gt('+lastFixedColumnIndex+')').remove();
+            fixedColumnTable.find('td:gt('+lastFixedColumnIndex+')').remove();
+            fixedColumnTable.addClass('fixedColumnTable pitGrid');
+
+            // Add the fixed column table to the template
+            htmlTemplate.find('table').before(fixedColumnTable);
+
+            htmlTemplate.find('.mainTable').wrap('<div style="overflow: auto; max-height:'+maxHeight+';"/>');
+            htmlTemplate.find('.fixedColumnTable').wrap('<div style="overflow: hidden; float:left; max-height:'+maxHeight+';"/>');
+            debugger;
+            htmlTemplate.find('.fixedColumnTable').parent('div').css('max-width', '+='+$scope.scrollBarWidth);
+
+            htmlTemplate.find('tbody tr').css('height', '30px');
           }
           
           $scope.pitGridCfgReady
@@ -135,8 +194,8 @@ app.directive('pitGrid', function($http, $compile, configLoader){
                   }else{
                     headerWidth = $table.width();
                   }
-                  if(headerWidth > $container.width() -15)
-                    headerWidth = $container.width() -15;
+                  if(headerWidth > $container.width() - $scope.scrollBarWidth)
+                    headerWidth = $container.width() - $scope.scrollBarWidth;
 
                   $fixedHeader.css({
                     'width': headerWidth,
