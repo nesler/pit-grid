@@ -1,0 +1,39 @@
+<!DOCTYPE HTML>
+<html ng-app="gridtest">
+
+  <head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=8" >
+    <title>AngularJS gridtest</title>
+
+    <link type="text/css"  rel="stylesheet" href="style.css" />
+
+    <script type="text/javascript" src="http://code.jquery.com/jquery-1.10.2.min.js"></script>
+    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.0rc1/angular.min.js"></script>
+    <script type="text/javascript" src="app.js"></script>
+
+  </head>
+
+  <body ng-controller="MainCtrl">
+    <div class="header">
+      <p>Hello {{name}}!</p>
+    </div>
+    <div class="menu">
+      <p>Hello {{name}}!</p>
+    </div>
+    <div class="container">
+      <div
+        pit-grid
+        pit-grid-template="table.html"
+        pit-grid-config="config.json"
+        pit-grid-editable="toggle"
+        pit-grid-fixed-header
+        pit-grid-enable-fixed-columns>
+      </div>
+    </div>
+    <div class="footer">
+      <p>Hello {{name}}!</p>
+    </div>
+  </body>
+
+</html>

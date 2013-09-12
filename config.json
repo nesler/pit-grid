@@ -1,0 +1,61 @@
+{
+  "CALCULATIONS": {
+    "9NITRAT": "(FIANITRAT*1-FIANITRIT*0.74)*25/WEIGHT",
+    "9NITRIT": "25/WEIGHT*FIANITRIT"
+  },
+  "FLAGS": {
+    
+  },
+  "BUTTONS": {
+    
+  },
+  "CONSTANTS": {
+    
+  },
+  "COLUMNS": {
+    "INSPLOT": {
+      "heading": "Insp. lot",
+      "type": "number"
+    },
+    "MATNR": {
+      "heading": "Mat",
+      "type": "number"
+    },
+    "CHARG": {
+      "heading": "Batch"
+    },
+    "SAMPLEID": {
+      "heading": "Prøve ID",
+      "sources": ["UERC1", "USERC2", "PHYS_SMPL"]
+    },
+    "ATTRIBUTE": {
+      "heading": "Attribut",
+      "input": {
+        "type": "w-attribute-dropdown"
+      }
+    },
+    "MSTR_CHAR": {
+      "heading": "Characteristic"
+    },
+    "DISHINDEX": {
+      "heading": "Løbenr.",
+      "input": {
+        "type": "number",
+        "index": 0
+      }
+    },
+    "WEIGHT": {
+      "heading": "Vægt",
+      "input": {
+        "type": "w-data-listener",
+        "index": 0
+      }
+    },
+    "MII_RESULT": {
+      "heading": "9NO3_NO2",
+      "input": {
+        "type": "w-sap-result"
+      }
+    }
+  }
+}

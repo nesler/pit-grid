@@ -1,0 +1,53 @@
+/* Put your css in here */
+table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+th, td {
+  white-space: nowrap;
+  padding: 2px 5px;
+}
+
+.pitGridHeader {
+  background-color: orange;
+  font-weight: bold;
+  text-align: left;
+}
+
+.hidden {
+  display:none;
+}
+
+/*.header, .menu, .footer {
+  position: fixed;
+  background-color: white;
+  z-index: 10;
+  padding:0px 10px;
+}
+
+.header {
+  top: 0px;
+  right: 0px;
+}
+
+.menu {
+  top: 0px;
+  left: 0px;
+  bottom: 0px;
+}
+
+.footer {
+  bottom: 0px;
+  right: 0px;
+}*/
+
+input {
+  width:75px;
+}
+
+.pitGridContainer {
+  height: 500px;
+  /*width: 100%;*/
+  overflow: auto;
+}
