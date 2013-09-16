@@ -69,6 +69,14 @@ app.directive('pitGrid', function($http, $compile, configLoader){
           break;
       }
 
+      $scope.onRowSelected = function($event, row){
+        var p = this.$parent;
+        p.classNames = p.classNames || {};
+        p.classNames['pit-grid-selected'] = !p.classNames['pit-grid-selected'];
+
+        console.log($event);
+      }
+
       $scope.fixedHeaderPos = function(container){
         var  pos = container.offset()
             ,scrollTop = $(window).scrollTop()
@@ -114,18 +122,20 @@ app.directive('pitGrid', function($http, $compile, configLoader){
         .success(function(htmlTemplate){
           var maxHeight = (angular.isDefined(attrs.pitGridMaxHeight) ? attrs.pitGridMaxHeight : '100%')
 
-          htmlTemplate = $('<div><div class="pitGridContainerButtons"></div><div class="pitGridContainer">' + htmlTemplate + '</div></div>');
+          htmlTemplate = $('<div><div class="pitGridContainerButtons"></div><div class="pitGridContainer" style="overflow:auto; max-height:'+maxHeight+';">' + htmlTemplate + '</div></div>');
           
           htmlTemplate.find('input').attr('ng-disabled', '!editable');
+          htmlTemplate.find('tr').attr('ng-class', 'classNames');
 
           if(attrs.pitGridEditable == 'toggle'){
             htmlTemplate.find('.pitGridContainerButtons').append('<button ng-click="editable = !editable">Can edit: {{editable}}</button>');
           }
 
-          /*
-            TODO: Impl. http://jsfiddle.net/snNuk/1/
-          */
+          if(angular.isDefined(attrs.pitGridRowSelect)){
+            htmlTemplate.find('tr').attr('ng-click', 'onRowSelected($event, row)');
+          }
 
+          // change table layout to use fixed left columns
           if(angular.isDefined(attrs.pitGridEnableFixedColumns)){
             var lastFixedColumnIndex = htmlTemplate.find('[pit-grid-fixed-column]:last').index()
                 ,mainTable = htmlTemplate.find('table')
@@ -139,15 +149,19 @@ app.directive('pitGrid', function($http, $compile, configLoader){
             // Remove non-fixed columns from fixed column table
             fixedColumnTable.find('th:gt('+lastFixedColumnIndex+')').remove();
             fixedColumnTable.find('td:gt('+lastFixedColumnIndex+')').remove();
-            fixedColumnTable.addClass('fixedColumnTable pitGrid');
+            fixedColumnTable.addClass('fixedColumnTable');
 
             // Add the fixed column table to the template
             htmlTemplate.find('table').before(fixedColumnTable);
 
+            htmlTemplate.find('.pitGridContainer').css({
+              'overflow': '',
+              'max-height': ''
+            })
+
             htmlTemplate.find('.mainTable').wrap('<div style="overflow: auto; max-height:'+maxHeight+';"/>');
+            htmlTemplate.find('.mainTable').parent('div').css('max-height', '+='+$scope.scrollBarWidth);
             htmlTemplate.find('.fixedColumnTable').wrap('<div style="overflow: hidden; float:left; max-height:'+maxHeight+';"/>');
-            debugger;
-            htmlTemplate.find('.fixedColumnTable').parent('div').css('max-width', '+='+$scope.scrollBarWidth);
 
             htmlTemplate.find('tbody tr').css('height', '30px');
           }
@@ -158,67 +172,94 @@ app.directive('pitGrid', function($http, $compile, configLoader){
               el.replaceWith($scope.tableDom);
 
               var  $container = $scope.tableDom.find('div.pitGridContainer')
-                  ,$table = $container.find('table')
-                  ,$fixedHeader = $('<div style="position: fixed; overflow: hidden; display:table-row; width:0px;" class="pitGridHeader"/>');
+                  ,$tables = $container.find('table')
+                  ,$fixedColTable = $tables.filter('.fixedColumnTable')
+                  ,$mainTable = $tables.filter('.mainTable')
+                  ,$scrollContainer = ($mainTable.length > 0 ? $mainTable.parent() : $container);                
 
-              $table.find('thead').addClass('pitGridHeader');
+              $tables.find('thead').addClass('pitGridHeader');
 
-              $container.find('table:first').before($fixedHeader);
-
-              // set fixed widths and add fixed header
+              // add fixed header and set fixed widths
               if(angular.isDefined(attrs.pitGridFixedHeader)){
-                $($scope.tableDom.find('div.pitGridContainer')).scroll(function(){
+                // Trigger all the bindings on first scroll.
+                // This make 98% sure, that rows are loaded and widths are steady
+                $scrollContainer.scroll(function(){
+                  // Only do this once!
                   if($scope.isHeaderInitialized)
                     return;
 
-                  var  $headings = $container.find('th');
+                  var baseOffsetLeft = 0;
+                  var containerOffsetLet = $container.offset().left;
+                  // For each table available, add a header. This will add a fixed header to the fixed columns table as well, if present
+                  $tables.each(function(i,table){
+                    var  $table = $(table)
+                        ,$headings = $table.find('th')
+                        ,$fixedHeader = $('<div style="position: fixed; overflow: hidden; display:table-row; width:0px;" class="pitGridHeader pitGridFixedHeader"/>');
 
-                  $headings.each(function (i, e) {
-                    var w = $(e).width();
-                    var css = {
-                        'width': w,
-                        'min-width': w,
-                        'max-width': w,
-                        'padding' : $(e).css('padding'),
-                        'display': 'table-cell'
-                    };
-                    var $fixedCell = $('<div/>').css(css).text($(e).text());
-                    $fixedHeader.append($fixedCell);
-                  });
-
-                  var headerWidth = 0;
-                  if($table.length > 1){
-                    $table.each(function(){
-                      headerWidth += $(this).width();
+                    // Get the widths of eacn header, and add a div with the same dimensions to the fixed header
+                    $headings.each(function (i, e) {
+                      var w = $(e).width();
+                      var css = {
+                          'width': w,
+                          'min-width': w,
+                          'max-width': w,
+                          'padding' : $(e).css('padding'),
+                          'display': 'table-cell'
+                      };
+                      var $fixedCell = $('<div/>').css(css).text($(e).text());
+                      $fixedHeader.append($fixedCell);
                     });
-                  }else{
+
+                    // Get the width of the fixed header. Either the same width as the table, or if overflowing, the width of the container
+                    var headerWidth = 0;
                     headerWidth = $table.width();
-                  }
-                  if(headerWidth > $container.width() - $scope.scrollBarWidth)
-                    headerWidth = $container.width() - $scope.scrollBarWidth;
-
-                  $fixedHeader.css({
-                    'width': headerWidth,
-                    'height': $table.find('thead').height()
-                  });
-
-                  $container.scroll(function () {
-                    var left = $(this).scrollLeft();
-                    $fixedHeader.scrollLeft(left);
-                  });
-
-                  $(window).scroll(function () {
-                    var pos = $scope.fixedHeaderPos($container);
+                    if(headerWidth > $container.width() - baseOffsetLeft - $scope.scrollBarWidth)
+                      headerWidth = $container.width() - baseOffsetLeft - $scope.scrollBarWidth;
 
                     $fixedHeader.css({
-                      'left': pos.left,
-                      'top': pos.top
+                      'width': headerWidth,
+                      'height': $tables.find('thead').height(),
+                      'left' : baseOffsetLeft + containerOffsetLet
                     });
+
+                    // Wrap this in a clojure, since baseOffsetLieft and $fixedHeader changes for each iteration
+                    (function($fixedHeader, baseOffsetLeft){
+                      // Move the fixed header along when the window scrolls
+                      $(window).scroll(function () {
+                        var pos = $scope.fixedHeaderPos($container);
+                        $fixedHeader.css({
+                          'left': baseOffsetLeft - $(window).scrollLeft(),
+                          'top': pos.top
+                        });
+                      });
+                    })($fixedHeader, baseOffsetLeft + containerOffsetLet);
+                    $(window).scroll();
+
+                    baseOffsetLeft += headerWidth;
+                    $table.before($fixedHeader);
+                  });                 
+
+                  var $scrollHeader = $scrollContainer.find('.pitGridFixedHeader');
+                  $scrollContainer.scroll(function () {
+                    var $this = $(this);
+                    var left = $this.scrollLeft();
+                    $scrollHeader.scrollLeft(left);
                   });
-                  $(window).scroll();
 
                   $scope.isHeaderInitialized = true;
-                });
+                }); 
+              }
+              // add scroll-handler for fixed columns, to not scroll them
+              if(angular.isDefined(attrs.pitGridEnableFixedColumns)){
+
+                if($fixedColTable.length > 0){
+                  var $fixedColScroller = $fixedColTable.parent();
+                  $scrollContainer.scroll(function(){
+                    var $this = $(this);
+                    var top = $this.scrollTop();
+                    $fixedColScroller.scrollTop(top);
+                  });
+                }
               }
             });          
         });
