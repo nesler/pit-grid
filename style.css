@@ -15,6 +15,10 @@ th, td {
   text-align: left;
 }
 
+.pit-grid-selected {
+  background-color: red;
+}
+
 .hidden {
   display:none;
 }

@@ -10,6 +10,13 @@
 
     <script type="text/javascript" src="http://code.jquery.com/jquery-1.10.2.min.js"></script>
     <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.0rc1/angular.min.js"></script>
+    <script type="text/javascript" src="pitControls/utils.js"></script>
+    <script type="text/javascript" src="pitControls/namespaces.js"></script>
+    <script type="text/javascript" src="pitControls/services/configLoader.js"></script>
+    <script type="text/javascript" src="pitControls/directives/pitGrid.js"></script>
+    <script type="text/javascript" src="pitControls/directives/pitCalculated.js"></script>
+    <script type="text/javascript" src="pitControls/directives/pitOnlyNumbers.js"></script>
+    <script type="text/javascript" src="pitControls/directives/pitTrimLeadingZeros.js"></script>
     <script type="text/javascript" src="app.js"></script>
 
   </head>
@@ -54,6 +61,7 @@
     <div class="container" style="margin-left: 200px;">
       <div
         pit-grid
+        pit-grid-data-source="filteredData"
         pit-grid-template="table.html"
         pit-grid-config="config.json"
         pit-grid-editable="toggle"

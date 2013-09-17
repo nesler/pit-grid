@@ -42,16 +42,45 @@
     </tr>
   </thead>
   <tbody>
-    <tr  ng-repeat="row in rows | filter:isRowHidden"
-          ng-controller="RowCtrl">
-      <td trim-leading-zeros>{{row.Barcode}}</td>
-      <td trim-leading-zeros>{{row.INSPLOT}}</td>
+    <tr><!--   ng-repeat="row in rows | filter:isRowHidden"> -->
+      <td pit-trim-leading-zeros>{{row.Barcode}}</td>
+      <td pit-trim-leading-zeros>{{row.INSPLOT}}</td>
       <td>{{row.MSTR_CHAR}}</td>
-      <td><input type="text" ng-model="row.FIANITRAT" only-numbers/></td>
-      <td><input type="text" ng-model="row.FIANITRIT" only-numbers/></td>
-      <td><input type="text" ng-model="row.WEIGHT" only-numbers/></td>
-      <td ng-model="row.9NITRAT" calculated calculated-formula="pitGridConfig.CALCULATIONS.9NITRAT" calculated-decimals="2" sap-result>{{row.9NITRAT}}</td>
-      <td ng-model="row.9NITRIT" calculated calculated-formula="pitGridConfig.CALCULATIONS.9NITRIT" calculated-decimals="2" sap-result>{{row.9NITRIT}}</td>
+      <td><input type="text" ng-model="row.FIANITRAT" pit-only-numbers/></td>
+      <td><input type="text" ng-model="row.FIANITRIT" pit-only-numbers/></td>
+      <td><input type="text" ng-model="row.WEIGHT" pit-only-numbers/></td>
+      <td ng-model="row.9NITRAT" pit-calculated pit-calculated-formula="pitGridConfig.CALCULATIONS.9NITRAT" pit-calculated-decimals="2" sap-result>{{row.9NITRAT}}</td>
+      <td ng-model="row.9NITRIT" pit-calculated pit-calculated-formula="pitGridConfig.CALCULATIONS.9NITRIT" pit-calculated-decimals="2" sap-result>{{row.9NITRIT}}</td>
+      <td>{{row.MSTR_CHAR}}</td>
+      <td><input type="text" ng-model="row.FIANITRAT" pit-only-numbers/></td>
+      <td><input type="text" ng-model="row.FIANITRIT" pit-only-numbers/></td>
+      <td><input type="text" ng-model="row.WEIGHT" pit-only-numbers/></td>
+      <td ng-model="row.9NITRAT" pit-calculated pit-calculated-formula="pitGridConfig.CALCULATIONS.9NITRAT" pit-calculated-decimals="2" sap-result>{{row.9NITRAT}}</td>
+      <td ng-model="row.9NITRIT" pit-calculated pit-calculated-formula="pitGridConfig.CALCULATIONS.9NITRIT" pit-calculated-decimals="2" sap-result>{{row.9NITRIT}}</td>
+      <td>{{row.MSTR_CHAR}}</td>
+      <td><input type="text" ng-model="row.FIANITRAT" pit-only-numbers/></td>
+      <td><input type="text" ng-model="row.FIANITRIT" pit-only-numbers/></td>
+      <td><input type="text" ng-model="row.WEIGHT" pit-only-numbers/></td>
+      <td ng-model="row.9NITRAT" pit-calculated pit-calculated-formula="pitGridConfig.CALCULATIONS.9NITRAT" pit-calculated-decimals="2" sap-result>{{row.9NITRAT}}</td>
+      <td ng-model="row.9NITRIT" pit-calculated pit-calculated-formula="pitGridConfig.CALCULATIONS.9NITRIT" pit-calculated-decimals="2" sap-result>{{row.9NITRIT}}</td>
+      <td>{{row.MSTR_CHAR}}</td>
+      <td><input type="text" ng-model="row.FIANITRAT" pit-only-numbers/></td>
+      <td><input type="text" ng-model="row.FIANITRIT" pit-only-numbers/></td>
+      <td><input type="text" ng-model="row.WEIGHT" pit-only-numbers/></td>
+      <td ng-model="row.9NITRAT" pit-calculated pit-calculated-formula="pitGridConfig.CALCULATIONS.9NITRAT" pit-calculated-decimals="2" sap-result>{{row.9NITRAT}}</td>
+      <td ng-model="row.9NITRIT" pit-calculated pit-calculated-formula="pitGridConfig.CALCULATIONS.9NITRIT" pit-calculated-decimals="2" sap-result>{{row.9NITRIT}}</td>
+      <td>{{row.MSTR_CHAR}}</td>
+      <td><input type="text" ng-model="row.FIANITRAT" pit-only-numbers/></td>
+      <td><input type="text" ng-model="row.FIANITRIT" pit-only-numbers/></td>
+      <td><input type="text" ng-model="row.WEIGHT" pit-only-numbers/></td>
+      <td ng-model="row.9NITRAT" pit-calculated pit-calculated-formula="pitGridConfig.CALCULATIONS.9NITRAT" pit-calculated-decimals="2" sap-result>{{row.9NITRAT}}</td>
+      <td ng-model="row.9NITRIT" pit-calculated pit-calculated-formula="pitGridConfig.CALCULATIONS.9NITRIT" pit-calculated-decimals="2" sap-result>{{row.9NITRIT}}</td>
+      <td>{{row.MSTR_CHAR}}</td>
+      <td><input type="text" ng-model="row.FIANITRAT" pit-only-numbers/></td>
+      <td><input type="text" ng-model="row.FIANITRIT" pit-only-numbers/></td>
+      <td><input type="text" ng-model="row.WEIGHT" pit-only-numbers/></td>
+      <td ng-model="row.9NITRAT" pit-calculated pit-calculated-formula="pitGridConfig.CALCULATIONS.9NITRAT" pit-calculated-decimals="2" sap-result>{{row.9NITRAT}}</td>
+      <td ng-model="row.9NITRIT" pit-calculated pit-calculated-formula="pitGridConfig.CALCULATIONS.9NITRIT" pit-calculated-decimals="2" sap-result>{{row.9NITRIT}}</td>
     </tr>
     <tr ng-show="loading">
       <td colspan="100000">Loading..</td>
