@@ -13,6 +13,7 @@
     <script type="text/javascript" src="pitControls/utils.js"></script>
     <script type="text/javascript" src="pitControls/namespaces.js"></script>
     <script type="text/javascript" src="pitControls/services/configLoader.js"></script>
+    <script type="text/javascript" src="pitControls/services/utilities.js"></script>
     <script type="text/javascript" src="pitControls/directives/pitGrid.js"></script>
     <script type="text/javascript" src="pitControls/directives/pitCalculated.js"></script>
     <script type="text/javascript" src="pitControls/directives/pitOnlyNumbers.js"></script>
@@ -61,7 +62,7 @@
     <div class="container" style="margin-left: 200px;">
       <div
         pit-grid
-        pit-grid-data-source="filteredData"
+        pit-grid-data-source="visibleRows"
         pit-grid-template="table.html"
         pit-grid-config="config.json"
         pit-grid-editable="toggle"

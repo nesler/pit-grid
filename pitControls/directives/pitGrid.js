@@ -1,4 +1,4 @@
-pitDirectives.directive('pitGrid', function($http, $compile, configLoader){
+pitDirectives.directive('pitGrid', function($http, $compile, configLoader, utilities){
   return {
     restrict: 'A',
     controller: function($scope, $element, $attrs){
@@ -56,42 +56,7 @@ pitDirectives.directive('pitGrid', function($http, $compile, configLoader){
         return selectedRows;
       }
 
-      $scope.fixedHeaderPos = function(container){
-        var  pos = container.offset()
-            ,scrollTop = $(window).scrollTop()
-            ,scrollLeft = $(window).scrollLeft()
-            ,left = pos.left - scrollLeft
-            ,top = pos.top - scrollTop;
-
-        return {top: top, left: left};
-      }
-
-      $scope.scrollBarWidth = (function() {
-        /* Taken from http://www.alexandre-gomes.com/?p=115 */
-        var inner = document.createElement('p');
-        inner.style.width = "100%";
-        inner.style.height = "200px";
-
-        var outer = document.createElement('div');
-        outer.style.position = "absolute";
-        outer.style.top = "0px";
-        outer.style.left = "0px";
-        outer.style.visibility = "hidden";
-        outer.style.width = "200px";
-        outer.style.height = "150px";
-        outer.style.overflow = "hidden";
-        outer.appendChild (inner);
-
-        document.body.appendChild (outer);
-        var w1 = inner.offsetWidth;
-        outer.style.overflow = 'scroll';
-        var w2 = inner.offsetWidth;
-        if (w1 == w2) w2 = outer.clientWidth;
-
-        document.body.removeChild (outer);
-
-        return (w1 - w2);
-      })();
+      $scope.scrollBarWidth = utilities.scrollbarWidth();
     },
     link: function($scope, el, attrs){
       var template = attrs.pitGridTemplate;
@@ -151,7 +116,7 @@ pitDirectives.directive('pitGrid', function($http, $compile, configLoader){
           }
 
           htmlTemplate.find('table').each(function(i,table){
-            $(table).find('tbody tr:first').attr('ng-repeat', 'row in '+attrs.pitGridDataSource+'');
+            $(table).find('tbody tr:first').attr('ng-repeat', 'row in '+attrs.pitGridDataSource);
           });
           
           $scope.pitGridCfgReady
@@ -169,6 +134,17 @@ pitDirectives.directive('pitGrid', function($http, $compile, configLoader){
 
               // add fixed header and set fixed widths
               if(angular.isDefined(attrs.pitGridFixedHeader)){
+
+                var fixedHeaderPos = function(container){
+                  var  pos = container.offset()
+                      ,scrollTop = $(window).scrollTop()
+                      ,scrollLeft = $(window).scrollLeft()
+                      ,left = pos.left - scrollLeft
+                      ,top = pos.top - scrollTop;
+
+                  return {top: top, left: left};
+                }
+
                 // Trigger all the bindings on first scroll.
                 // This make 98% sure, that rows are loaded and widths are steady
                 $scrollContainer.scroll(function(){
@@ -214,7 +190,7 @@ pitDirectives.directive('pitGrid', function($http, $compile, configLoader){
                     (function($fixedHeader, baseOffsetLeft){
                       // Move the fixed header along when the window scrolls
                       $(window).scroll(function () {
-                        var pos = $scope.fixedHeaderPos($container);
+                        var pos = fixedHeaderPos($container);
                         $fixedHeader.css({
                           'left': baseOffsetLeft - $(window).scrollLeft(),
                           'top': pos.top
@@ -232,8 +208,6 @@ pitDirectives.directive('pitGrid', function($http, $compile, configLoader){
                     var $this = $(this);
                     var left = $this.scrollLeft();
                     $scrollHeader.scrollLeft(left);
-
-                    $scope.renderRows();
                   });
 
                   $scope.isHeaderInitialized = true;

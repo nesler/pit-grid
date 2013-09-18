@@ -4,15 +4,19 @@ app.controller('MainCtrl', function($scope, $http, $timeout) {
   $scope.name = 'World 1 æøå';
 
   $scope.rows = [];
+  $scope.visibleRows = [];
   $scope.loading = true;
   $http.get('data.json')
     .success(function(data){
       $scope.rows = data.Rowsets.Rowset[0].Row;
-      $scope.filteredData = $scope.rows.filter(function(row){
-        return row.HIDDEN_ROW !== 'true' && row.DISHINDEX !== '---';
-      });
       $scope.loading = false;
     });
+
+  $scope.$watch('rows.length', function(newVal){
+    $scope.visibleRows = $scope.rows.filter(function(row){
+      return row.HIDDEN_ROW !== 'true' && row.DISHINDEX !== '---';
+    });
+  })
 });
 
 app.controller('TableCtrl', function($scope, $http, $timeout){
