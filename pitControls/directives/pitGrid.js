@@ -3,6 +3,10 @@ pitDirectives.directive('pitGrid', function($http, $compile, configLoader, utili
     restrict: 'A',
     controller: function($scope, $element, $attrs){
 
+      $scope.rowHeight = $attrs.pitGridRowHeight || 30;
+      $scope.gridHeight = (angular.isDefined($attrs.pitGridHeight) ? $attrs.pitGridHeight : '100%')
+      var gridHeightValue = $scope.gridHeight.replace('px', '')*1;
+
       $scope.pitGridCfgReady = configLoader($attrs.pitGridConfig).then(function(config){
         $scope.pitGridConfig = config;
       });
@@ -57,16 +61,84 @@ pitDirectives.directive('pitGrid', function($http, $compile, configLoader, utili
       }
 
       $scope.scrollBarWidth = utilities.scrollbarWidth();
+
+      $scope.dataSourceRows = [];
+      $scope.renderedRows = [];
+      var visibleRows = 0;
+
+      $scope.renderRows = function(){
+        if($scope.gridHeight == '100%')
+          return;
+
+        var scrollTop = $scope.$scrollContainer.scrollTop();
+        var ROWS_TOP = 4, ROWS_BOTTOM = 4;
+
+        var offsetTop = 0;
+        if(scrollTop > ROWS_TOP * $scope.rowHeight)
+          offsetTop = scrollTop - (ROWS_TOP * $scope.rowHeight);
+
+        var rowOffsetTop = Math.floor(offsetTop / $scope.rowHeight);
+
+        var tmp = $.extend([], $scope.dataSourceRows).splice(rowOffsetTop, (rowOffsetTop + ROWS_TOP + visibleRows + ROWS_BOTTOM));
+        for(var i = 0; i < tmp.length; ++i){
+          $scope.renderedRows[i] = tmp[i];
+        }
+
+        $scope.topRowStyle.height = offsetTop + 'px';
+
+        // console.log(rowOffsetTop, offsetTop)
+
+        // $scope.$apply(function(){
+        //   $scope.renderedRows = tmp
+        // });
+
+        if(!$scope.$root.$$phase)
+          $scope.$digest();
+      }
+
+      $scope.$watch($attrs.pitGridDataSource, function(newVal){
+        if(newVal.length == 0)
+          return;
+
+        $scope.dataSourceRows = $.extend([], newVal);
+
+        $scope.tableStyle.height = $scope.dataSourceRows.length * $scope.rowHeight + 'px';
+
+        if($scope.gridHeight == '100%')
+          $scope.renderedRows = $scope.dataSourceRows;
+        else if(visibleRows == 0){
+          visibleRows = Math.ceil(gridHeightValue / $scope.rowHeight);
+        }
+
+        $scope.renderRows();
+      });
+
+      $scope.tableStyle = {
+        'height': '0px'
+      }
+
+      $scope.topRowStyle = {
+        'height': '0px',
+        'max-height': '0px',
+        'line-height': '0px',
+        'padding': '0px'
+      }
+
+      $scope.bottomRowStyle = {
+        'height': '100%',
+        'max-height': '0px',
+        'line-height': '0px',
+        'padding': '0px'
+      }
     },
     link: function($scope, el, attrs){
       var template = attrs.pitGridTemplate;
       // Manually retreive and compile the template.
       // Do this to avoid directives in the template to be compiled before the actual table
       $http.get(template)
-        .success(function(htmlTemplate){
-          var maxHeight = (angular.isDefined(attrs.pitGridMaxHeight) ? attrs.pitGridMaxHeight : '100%')
+        .success(function(htmlTemplate){          
 
-          htmlTemplate = $('<div><div class="pit-grid-container-buttons"></div><div class="pit-grid-container" style="overflow:auto; max-height:'+maxHeight+';">' + htmlTemplate + '</div></div>');
+          htmlTemplate = $('<div><div class="pit-grid-container-buttons"></div><div class="pit-grid-container" style="overflow:auto; height:'+$scope.gridHeight+';">' + htmlTemplate + '</div></div>');
           
           htmlTemplate.find('input').attr('ng-disabled', '!editable');
           htmlTemplate.find('tr').attr('ng-class', 'getClassNames(row)');
@@ -105,19 +177,24 @@ pitDirectives.directive('pitGrid', function($http, $compile, configLoader, utili
 
             htmlTemplate.find('.pit-grid-container').css({
               'overflow': '',
-              'max-height': ''
+              'height': ''
             });
 
-            htmlTemplate.find('.mainTable').wrap('<div style="overflow: auto; max-height:'+maxHeight+';"/>');
-            htmlTemplate.find('.mainTable').parent('div').css('max-height', '+='+$scope.scrollBarWidth);
-            htmlTemplate.find('.fixedColumnTable').wrap('<div style="overflow: hidden; float:left; max-height:'+maxHeight+';"/>');
+            htmlTemplate.find('.mainTable').wrap('<div style="overflow: auto; height:'+$scope.gridHeight+';"/>');
+            htmlTemplate.find('.mainTable').parent('div').css('height', '+='+$scope.scrollBarWidth);
+            htmlTemplate.find('.fixedColumnTable').wrap('<div style="overflow: hidden; float:left; height:'+$scope.gridHeight+';"/>');
 
-            htmlTemplate.find('tbody tr').css('height', '30px');
+            htmlTemplate.find('tbody tr').css('height', $scope.rowHeight + 'px');
           }
 
-          htmlTemplate.find('table').each(function(i,table){
-            $(table).find('tbody tr:first').attr('ng-repeat', 'row in '+attrs.pitGridDataSource);
+          htmlTemplate.find('table tbody').each(function(i,tbody){
+            tbody = $(tbody);
+            tbody.find('tr:first').attr('ng-repeat', 'row in renderedRows');//+attrs.pitGridDataSource);
+            tbody.prepend('<tr ng-style="topRowStyle"><td colspan="100000" ng-style="topRowStyle">&nbsp;</td></tr>');
+            tbody.append('<tr ng-style="bottomRowStyle"><td colspan="100000" ng-style="bottomRowStyle">&nbsp;</td></tr>');
           });
+
+          htmlTemplate.find('table').attr('ng-style', 'tableStyle');
           
           $scope.pitGridCfgReady
             .then(function(){
@@ -208,6 +285,8 @@ pitDirectives.directive('pitGrid', function($http, $compile, configLoader, utili
                     var $this = $(this);
                     var left = $this.scrollLeft();
                     $scrollHeader.scrollLeft(left);
+
+                    $scope.renderRows();
                   });
 
                   $scope.isHeaderInitialized = true;
