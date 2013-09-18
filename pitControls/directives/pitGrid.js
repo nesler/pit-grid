@@ -2,7 +2,7 @@ pitDirectives.directive('pitGrid', function($http, $compile, configLoader){
   return {
     restrict: 'A',
     controller: function($scope, $element, $attrs){
-      $scope.pitGridConfig = {};
+
       $scope.pitGridCfgReady = configLoader($attrs.pitGridConfig).then(function(config){
         $scope.pitGridConfig = config;
       });
@@ -92,18 +92,6 @@ pitDirectives.directive('pitGrid', function($http, $compile, configLoader){
 
         return (w1 - w2);
       })();
-
-      var getRowHeight = function(){
-        return this.rowHeight || (this.rowHeight = $scope.tableDom.find('tbody tr:first').height());
-      }
-
-      $scope.renderRows = function(source){
-        debugger;
-        var scrollTop = $scope.$scrollContainer.scrollTop();
-        var rowHeight = getRowHeight();
-        var cntRowsScrolled = scrollTop/rowHeight;
-        return $scope.sourceRows.splice(cntRowsScrolled-5, cntRowsScrolled + 25);
-      }
     },
     link: function($scope, el, attrs){
       var template = attrs.pitGridTemplate;
@@ -113,13 +101,13 @@ pitDirectives.directive('pitGrid', function($http, $compile, configLoader){
         .success(function(htmlTemplate){
           var maxHeight = (angular.isDefined(attrs.pitGridMaxHeight) ? attrs.pitGridMaxHeight : '100%')
 
-          htmlTemplate = $('<div><div class="pitGridContainerButtons"></div><div class="pitGridContainer" style="overflow:auto; max-height:'+maxHeight+';">' + htmlTemplate + '</div></div>');
+          htmlTemplate = $('<div><div class="pit-grid-container-buttons"></div><div class="pit-grid-container" style="overflow:auto; max-height:'+maxHeight+';">' + htmlTemplate + '</div></div>');
           
           htmlTemplate.find('input').attr('ng-disabled', '!editable');
           htmlTemplate.find('tr').attr('ng-class', 'getClassNames(row)');
 
           if(attrs.pitGridEditable == 'toggle'){
-            htmlTemplate.find('.pitGridContainerButtons').append('<button ng-click="editable = !editable">Can edit: {{editable}}</button>');
+            htmlTemplate.find('.pit-grid-container-buttons').append('<button ng-click="editable = !editable">Can edit: {{editable}}</button>');
           }
 
           if(angular.isDefined(attrs.pitGridRowSelect)){
@@ -131,7 +119,7 @@ pitDirectives.directive('pitGrid', function($http, $compile, configLoader){
             // if the table had a specific controller attached, remove it and add it to the parent div
             var tableController = htmlTemplate.find('table').attr('ng-controller');
             htmlTemplate.find('table').removeAttr('ng-controller');
-            htmlTemplate.find('.pitGridContainer').attr('ng-controller', tableController);
+            htmlTemplate.find('.pit-grid-container').attr('ng-controller', tableController);
 
             var lastFixedColumnIndex = htmlTemplate.find('[pit-grid-fixed-column]:last').index()
                 ,mainTable = htmlTemplate.find('table')
@@ -150,7 +138,7 @@ pitDirectives.directive('pitGrid', function($http, $compile, configLoader){
             // Add the fixed column table to the template
             htmlTemplate.find('table').before(fixedColumnTable);
 
-            htmlTemplate.find('.pitGridContainer').css({
+            htmlTemplate.find('.pit-grid-container').css({
               'overflow': '',
               'max-height': ''
             });
@@ -171,13 +159,13 @@ pitDirectives.directive('pitGrid', function($http, $compile, configLoader){
               $scope.tableDom = $compile(htmlTemplate)($scope);
               el.replaceWith($scope.tableDom);
 
-              var  $container = $scope.tableDom.find('div.pitGridContainer')
+              var  $container = $scope.tableDom.find('div.pit-grid-container')
                   ,$tables = $container.find('table')
                   ,$fixedColTable = $tables.filter('.fixedColumnTable')
                   ,$mainTable = $tables.filter('.mainTable')
                   ,$scrollContainer = $scope.$scrollContainer = ($mainTable.length > 0 ? $mainTable.parent() : $container);                
 
-              $tables.find('thead').addClass('pitGridHeader');
+              $tables.find('thead').addClass('pit-grid-header');
 
               // add fixed header and set fixed widths
               if(angular.isDefined(attrs.pitGridFixedHeader)){
@@ -194,7 +182,7 @@ pitDirectives.directive('pitGrid', function($http, $compile, configLoader){
                   $tables.each(function(i,table){
                     var  $table = $(table)
                         ,$headings = $table.find('th')
-                        ,$fixedHeader = $('<div style="position: fixed; overflow: hidden; display:table-row; width:0px;" class="pitGridHeader pitGridFixedHeader"/>');
+                        ,$fixedHeader = $('<div style="position: fixed; overflow: hidden; display:table-row; width:0px;" class="pit-grid-header pit-grid-fixed-header"/>');
 
                     // Get the widths of eacn header, and add a div with the same dimensions to the fixed header
                     $headings.each(function (i, e) {
@@ -239,11 +227,13 @@ pitDirectives.directive('pitGrid', function($http, $compile, configLoader){
                     $table.before($fixedHeader);
                   });                 
 
-                  var $scrollHeader = $scrollContainer.find('.pitGridFixedHeader');
+                  var $scrollHeader = $scrollContainer.find('.pit-grid-fixed-header');
                   $scrollContainer.scroll(function () {
                     var $this = $(this);
                     var left = $this.scrollLeft();
                     $scrollHeader.scrollLeft(left);
+
+                    $scope.renderRows();
                   });
 
                   $scope.isHeaderInitialized = true;

@@ -9,7 +9,7 @@ th, td {
   padding: 2px 5px;
 }
 
-.pitGridHeader {
+.pit-grid-header {
   background-color: orange;
   font-weight: bold;
   text-align: left;

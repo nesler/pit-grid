@@ -2,21 +2,23 @@ var app = angular.module('gridtest', ['pitControls']);
 
 app.controller('MainCtrl', function($scope, $http, $timeout) {
   $scope.name = 'World 1 æøå';
-});
 
-app.controller('TableCtrl', function($scope, $http, $timeout){
   $scope.rows = [];
-  $scope.isRowHidden = function(row){
-    return row.HIDDEN_ROW !== 'true' && row.DISHINDEX !== '---';
-  }
-  
   $scope.loading = true;
   $http.get('data.json')
     .success(function(data){
       $scope.rows = data.Rowsets.Rowset[0].Row;
-      $scope.filteredData = $scope.rows.filter($scope.isRowHidden);
+      $scope.filteredData = $scope.rows.filter(function(row){
+        return row.HIDDEN_ROW !== 'true' && row.DISHINDEX !== '---';
+      });
       $scope.loading = false;
     });
+});
+
+app.controller('TableCtrl', function($scope, $http, $timeout){
+  $scope.isRowHidden = function(row){
+    return row.HIDDEN_ROW !== 'true' && row.DISHINDEX !== '---';
+  }
 });
 
 app.directive('sapResult', function(){
