@@ -12,7 +12,11 @@ pitDirectives.directive('pitTrimLeadingZeros', function(){
 
       if(!source) return;
 
-      var result = $scope.$eval(model).replace(/^0+/,'');
+      var val = $scope.$eval(model);
+      if(angular.isNumber(val))
+        return;
+      
+      var result = val.replace(/^0+/,'');
       $scope.$eval(model + '=' + result);
     }
   };
