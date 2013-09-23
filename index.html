@@ -12,7 +12,6 @@
     <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.0rc1/angular.min.js"></script>
     <script type="text/javascript" src="pitControls/utils.js"></script>
     <script type="text/javascript" src="pitControls/namespaces.js"></script>
-    <script type="text/javascript" src="pitControls/services/configLoader.js"></script>
     <script type="text/javascript" src="pitControls/services/utilities.js"></script>
     <script type="text/javascript" src="pitControls/directives/pitGrid.js"></script>
     <script type="text/javascript" src="pitControls/directives/pitCalculated.js"></script>
@@ -69,7 +68,22 @@
         pit-grid-height="250px"
         pit-grid-fixed-header
         pit-grid-enable-fixed-columns
-        pit-grid-row-select>
+        pit-grid-row-select
+        pit-grid-render-mode="scroll"
+        pit-grid-loading-propery="loading">
+      </div>
+
+      <div
+        pit-grid
+        pit-grid-data-source="rows"
+        pit-grid-template="simpleTable.html"
+        pit-grid-editable="toggle"
+        pit-grid-config="testCfg"
+        pit-grid-height="250px"
+        
+        pit-grid-enable-fixed-columns
+        pit-grid-row-select
+        pit-grid-render-mode="all">
       </div>
     </div>
     <div class="footer">
