@@ -6,13 +6,12 @@ app.controller('MainCtrl', function($scope, $http, $timeout) {
   $scope.rows = [];
   $scope.visibleRows = [];
   $scope.loading = true;
-  $timeout(function(){
-    $http.get('data.json')
-      .success(function(data){
-        $scope.rows = data.Rowsets.Rowset[0].Row;
-        $scope.loading = false;
-      });
-    }, 200)
+
+  $http.get('data.json')
+    .success(function(data){
+      $scope.rows = data.Rowsets.Rowset[0].Row;
+      $scope.loading = false;
+    });
   
 
   $scope.$watch('rows.length', function(newVal){

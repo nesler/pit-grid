@@ -10,9 +10,7 @@ th, td {
 }
 
 .pit-grid-header {
-  background-color: orange;
-  font-weight: bold;
-  text-align: left;
+  background-color: white;
 }
 
 .pit-grid-selected {

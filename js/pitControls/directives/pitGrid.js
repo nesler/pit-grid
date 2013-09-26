@@ -4,7 +4,7 @@ pitDirectives.directive('pitGrid', function($http, $q, $compile, utilities){
     scope: {},
     controller: function($scope, $element, $attrs){
 
-      $scope.rowHeight = $attrs.pitGridRowHeight || 30;
+      $scope.rowHeight = $attrs.pitGridRowHeight || 45;
       $scope.gridHeight = (angular.isDefined($attrs.pitGridHeight) ? $attrs.pitGridHeight.replace('px', '')*1 : '100%')
       $scope.renderMode = angular.isDefined($attrs.pitGridRenderMode) ? $attrs.pitGridRenderMode.toLowerCase() : 'virtual';
 
@@ -312,19 +312,19 @@ pitDirectives.directive('pitGrid', function($http, $q, $compile, utilities){
                   $tables.each(function(i,table){
                     var  $table = $(table)
                         ,$headings = $table.find('th')
-                        ,$fixedHeader = $('<div style="position: fixed; overflow: hidden; display:table-row; width:0px;" class="pit-grid-header pit-grid-fixed-header"/>');
+                        ,$fixedHeader = $('<tr style="position: fixed; overflow: hidden; width:0px;" class="pit-grid-header pit-grid-fixed-header"/>');
+                        //,$fixedHeader = $('<div style="position: fixed; overflow: hidden; display:table-row; width:0px;" class="pit-grid-header pit-grid-fixed-header"/>');
 
                     // Get the widths of eacn header, and add a div with the same dimensions to the fixed header
                     $headings.each(function (i, e) {
-                      var w = $(e).width();
+                      var w = $(e).innerWidth();
                       var css = {
                           'width': w,
                           'min-width': w,
                           'max-width': w,
-                          'padding' : $(e).css('padding'),
-                          'display': 'table-cell'
+                          'padding' : $(e).css('padding')
                       };
-                      var $fixedCell = $('<div/>').css(css).text($(e).text());
+                      var $fixedCell = $('<th/>').css(css).text($(e).text());
                       $fixedHeader.append($fixedCell);
                     });
 
@@ -336,6 +336,8 @@ pitDirectives.directive('pitGrid', function($http, $q, $compile, utilities){
 
                     $fixedHeader.css({
                       'width': headerWidth,
+                      'min-width': headerWidth,
+                      'max-width': headerWidth,
                       'height': $tables.find('thead').height(),
                       'left' : baseOffsetLeft + containerOffsetLet
                     });
@@ -354,7 +356,8 @@ pitDirectives.directive('pitGrid', function($http, $q, $compile, utilities){
                     $(window).scroll();
 
                     baseOffsetLeft += headerWidth;
-                    $table.before($fixedHeader);
+                    $table.find('thead').append($fixedHeader);
+                    //$table.before($fixedHeader);
                   });                 
 
                   var $scrollHeader = $scrollContainer.find('.pit-grid-fixed-header');
