@@ -23,6 +23,10 @@ app.controller('MainCtrl', function($scope, $http, $timeout) {
   });
 
   $scope.testCfg = {'abe': 1}
+
+  $scope.clickme = function(index){
+    console.log(index);
+  }
 });
 
 app.controller('TableCtrl', function($scope, $http, $timeout){

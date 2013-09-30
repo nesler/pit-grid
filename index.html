@@ -20,6 +20,7 @@
     <script type="text/javascript" src="js/pitControls/directives/pitOnlyNumbers.js"></script>
     <script type="text/javascript" src="js/pitControls/directives/pitTrimLeadingZeros.js"></script>
     <script type="text/javascript" src="js/pitControls/directives/pitProgressIndicator.js"></script>
+    <script type="text/javascript" src="js/pitControls/directives/pitPageIndicator.js"></script>
     <script type="text/javascript" src="js/app.js"></script>
 
   </head>
@@ -80,6 +81,7 @@
         pit-grid-row-color-odds
         pit-grid-pagesize="20">
       </div>
+      <div pit-page-indicator="5" pit-grid-page-indicator-click="clickme"></div>
       <br>
       <button class="btn" ng-click="scope_progress = scope_progress+20">Go progress!</button>
       <div pit-progress-indicator="scope_progress"></div>
