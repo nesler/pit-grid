@@ -11,7 +11,14 @@ app.controller('MainCtrl', function($scope, $http, $timeout) {
   $timeout(function(){
     $http.get('data.json')
       .success(function(data){
-        $scope.rows = data.Rowsets.Rowset[0].Row;
+        //$scope.rows = data.Rowsets.Rowset[0].Row;
+        var rows = data.Rowsets.Rowset[0].Row;
+        var tmp = [];
+        for(var i = 0; i < rows.length; ++i){
+          rows[i].realIndex = i;
+          tmp.push(rows[i]);
+        }
+        $scope.rows = tmp;
         $scope.loading = false;
       });
     }, 500);  

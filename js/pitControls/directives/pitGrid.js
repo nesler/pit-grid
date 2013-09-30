@@ -150,9 +150,11 @@ pitDirectives.directive('pitGrid', function($http, $q, $compile, utilities){
         $scope.bottomRowStyle.height = 0;
       }
 
-      $scope.currentPage = 0
-      function renderPaged(){
+      $scope.totalPages = 0;
+      function renderPaged(page){
+        $scope.currentPage = page || 0;
         var pageSize = $attrs.pitGridPageSize*1;
+        $scope.totalPages = Math.ceil($scope.dataSourceRows.length/pageSize);
         var tmp = [];
         for(var i = $attrs.pitGridPageSize * $scope.currentPage; i < $attrs.pitGridPageSize * ($scope.currentPage+1); ++i){
           var row = $scope.dataSourceRows[i];
@@ -162,6 +164,8 @@ pitDirectives.directive('pitGrid', function($http, $q, $compile, utilities){
         
         $scope.renderedRows = tmp;
 
+        $scope.tableStyle.height = $scope.renderedRows * $scope.rowHeight;
+
         if(!$scope.$root.$$phase)
           $scope.$digest();
       }
@@ -170,11 +174,9 @@ pitDirectives.directive('pitGrid', function($http, $q, $compile, utilities){
 
       $scope.renderRows = function(){
         if(typeof renderer == 'function'){
-          renderer();
+          renderer.apply(this, arguments);
           return;
         }
-        if($scope.gridHeight == '100%')
-          $scope.renderMode = 'all';
 
         switch($scope.renderMode){
           case 'virtual':
@@ -194,7 +196,7 @@ pitDirectives.directive('pitGrid', function($http, $q, $compile, utilities){
         if(typeof renderer != 'function')
           renderer = renderAll;
 
-        renderer();
+        renderer.apply(this, arguments);
       }
 
       $scope.tableStyle = {
@@ -223,7 +225,8 @@ pitDirectives.directive('pitGrid', function($http, $q, $compile, utilities){
           return;
 
         $scope.dataSourceRows = newVal;
-        $scope.tableStyle.height = $scope.dataSourceRows.length * $scope.rowHeight;
+        if(angular.isDefined($attrs.pitGridPageSize) && $attrs.pitGridPageSize*1 > 0)
+          $scope.tableStyle.height = $attrs.pitGridPageSize*1 * $scope.rowHeight;
 
         if(visibleRows == 0)
           visibleRows = Math.ceil($scope.gridHeight / $scope.rowHeight);
@@ -296,6 +299,10 @@ pitDirectives.directive('pitGrid', function($http, $q, $compile, utilities){
             htmlTemplate.find('tbody tr').css('height', $scope.rowHeight + 'px');
 
             htmlTemplate.find('tr').each(function(){ $(this).find('td:first, th:first').css('borderLeft', 'none'); });
+          }
+
+          if($scope.renderMode == 'paged'){
+            htmlTemplate.append('<div pit-page-indicator="totalPages" pit-grid-page-indicator-click="renderRows"></div>')
           }
 
           htmlTemplate.find('table tbody').each(function(i,tbody){
@@ -443,9 +450,10 @@ pitDirectives.directive('pitGrid', function($http, $q, $compile, utilities){
                 }
               }
 
-              $scrollContainer.bind('scroll', function(){
-                $scope.renderRows();
-              });
+              if($scope.renderMode == 'scroll' || $scope.renderMode == 'virtual')
+                $scrollContainer.bind('scroll', function(){
+                  $scope.renderRows();
+                });
 
               $scope.$emit('pitGridDomLinked', attrs);
             });          

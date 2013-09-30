@@ -3,6 +3,7 @@
     <tr>
       <th pit-grid-fixed-column>Barcode</th>
       <th pit-grid-fixed-column>Insp Lot</th>
+      <th>asd</th>
       <th>Char</th>
       <th>FIANITRAT</th>
       <th>FIANITRIT</th>
@@ -27,6 +28,7 @@
     <tr><!--   ng-repeat="row in rows | filter:isRowHidden"> -->
       <td pit-trim-leading-zeros>{{row.Barcode}}</td>
       <td pit-trim-leading-zeros>{{row.INSPLOT}}</td>
+      <td>{{row.realIndex}}</td>
       <td>{{row.MSTR_CHAR}}</td>
       <td><input type="text" ng-model="row.FIANITRAT" pit-only-numbers/></td>
       <td><input type="text" ng-model="row.FIANITRIT" pit-only-numbers/></td>
