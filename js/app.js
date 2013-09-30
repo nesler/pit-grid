@@ -6,13 +6,15 @@ app.controller('MainCtrl', function($scope, $http, $timeout) {
   $scope.rows = [];
   $scope.visibleRows = [];
   $scope.loading = true;
+  $scope.scope_progress = 20;
 
-  $http.get('data.json')
-    .success(function(data){
-      $scope.rows = data.Rowsets.Rowset[0].Row;
-      $scope.loading = false;
-    });
-  
+  $timeout(function(){
+    $http.get('data.json')
+      .success(function(data){
+        $scope.rows = data.Rowsets.Rowset[0].Row;
+        $scope.loading = false;
+      });
+    }, 500);  
 
   $scope.$watch('rows.length', function(newVal){
     $scope.visibleRows = $scope.rows.filter(function(row){
@@ -21,9 +23,6 @@ app.controller('MainCtrl', function($scope, $http, $timeout) {
   });
 
   $scope.testCfg = {'abe': 1}
-  $scope.$on('pitGridDomReady', function(){
-    console.log(arguments);
-  })
 });
 
 app.controller('TableCtrl', function($scope, $http, $timeout){

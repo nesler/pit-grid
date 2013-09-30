@@ -19,6 +19,7 @@
     <script type="text/javascript" src="js/pitControls/directives/pitCalculated.js"></script>
     <script type="text/javascript" src="js/pitControls/directives/pitOnlyNumbers.js"></script>
     <script type="text/javascript" src="js/pitControls/directives/pitTrimLeadingZeros.js"></script>
+    <script type="text/javascript" src="js/pitControls/directives/pitProgressIndicator.js"></script>
     <script type="text/javascript" src="js/app.js"></script>
 
   </head>
@@ -61,6 +62,8 @@
       <p>Hello {{name}}!</p>
     </div>
     <div class="container" style="margin-left: 200px;">
+      <button ng-click="removeEvenRow()">Remove even row</button>
+      <input type="text" ng-model="visibleRows[1].MSTR_CHAR">
       <div
         pit-grid
         pit-grid-data-source="visibleRows"
@@ -71,22 +74,15 @@
         pit-grid-fixed-header
         pit-grid-enable-fixed-columns
         pit-grid-row-select
-        pit-grid-render-mode="scroll"
-        pit-grid-loading-propery="loading">
+        pit-grid-render-mode="virtual"
+        pit-grid-loading-propery="loading"
+        pit-grid-row-hover-highlight
+        pit-grid-row-color-odds
+        pit-grid-pagesize="20">
       </div>
-
-      <div
-        pit-grid
-        pit-grid-data-source="rows"
-        pit-grid-template="simpleTable.html"
-        pit-grid-editable="toggle"
-        pit-grid-config="testCfg"
-        pit-grid-height="250px"
-        
-        pit-grid-enable-fixed-columns
-        pit-grid-row-select
-        pit-grid-render-mode="virtual">
-      </div>
+      <br>
+      <button class="btn" ng-click="scope_progress = scope_progress+20">Go progress!</button>
+      <div pit-progress-indicator="scope_progress"></div>
     </div>
     <div class="footer">
       <p>Hello {{name}}!</p>

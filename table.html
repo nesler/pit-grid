@@ -1,4 +1,4 @@
-<table ng-controller="TableCtrl" class="table table-striped">
+<table ng-controller="TableCtrl" class="table">
   <thead>
     <tr>
       <th pit-grid-fixed-column>Barcode</th>
@@ -45,9 +45,6 @@
       <td><input type="text" ng-model="row.WEIGHT" pit-only-numbers/></td>
       <td ng-model="row.9NITRAT" pit-calculated pit-calculated-formula="pitGridConfig.CALCULATIONS.9NITRAT" pit-calculated-decimals="2" sap-result>{{row.9NITRAT}}</td>
       <td ng-model="row.9NITRIT" pit-calculated pit-calculated-formula="pitGridConfig.CALCULATIONS.9NITRIT" pit-calculated-decimals="2" sap-result>{{row.9NITRIT}}</td>
-    </tr>
-    <tr ng-show="loading">
-      <td colspan="100000">Loading..</td>
     </tr>
   </tbody>
 </table>

@@ -43,7 +43,8 @@ pitDirectives.directive('pitGrid', function($http, $q, $compile, utilities){
           return {};
 
         return {
-          "pit-grid-selected": !!row.selected
+           "pit-grid-selected": !!row.selected
+          ,"pit-grid-hover": !!row.hover
         }
       }
 
@@ -84,10 +85,7 @@ pitDirectives.directive('pitGrid', function($http, $q, $compile, utilities){
         return $scope.tableStyle.height - scrollTop - (visibleRows * $scope.rowHeight);
       }
 
-      function renderVirtually(){
-        // if($scope.$root.$$phase && $scope.renderedRows.length > 0)
-        //   return;
-        
+      function renderVirtually(){        
         var scrollTop = $scope.$scrollContainer.scrollTop();
 
         var ROWS_TOP = 3, ROWS_BOTTOM = 3;
@@ -106,10 +104,16 @@ pitDirectives.directive('pitGrid', function($http, $q, $compile, utilities){
         var tmp = [];
         for(var i = rowOffsetTop; i < (rowOffsetTop + ROWS_TOP + visibleRows + ROWS_BOTTOM); ++i){
           var row = $scope.dataSourceRows[i];
-          if(!!row)
+          if(!!row){
             tmp.push(row);
+          }
+
+          lastRowIndex = i;
         }
+
         $scope.renderedRows = tmp;
+
+        prevScrollTop = scrollTop;
 
         $scope.topRowStyle.height = offsetTop;
         $scope.bottomRowStyle.height = getOffsetBottom(scrollTop);
@@ -119,9 +123,6 @@ pitDirectives.directive('pitGrid', function($http, $q, $compile, utilities){
       }
 
       function renderScrolling(){
-        // if($scope.$root.$$phase && $scope.renderedRows.length > 0)
-        //   return;
-
         var scrollTop = $scope.$scrollContainer.scrollTop();
 
         var numRenderedRows = $scope.renderedRows.length;
@@ -149,16 +150,31 @@ pitDirectives.directive('pitGrid', function($http, $q, $compile, utilities){
         $scope.bottomRowStyle.height = 0;
       }
 
+      $scope.currentPage = 0
+      function renderPaged(){
+        var pageSize = $attrs.pitGridPageSize*1;
+        var tmp = [];
+        for(var i = $attrs.pitGridPageSize * $scope.currentPage; i < $attrs.pitGridPageSize * ($scope.currentPage+1); ++i){
+          var row = $scope.dataSourceRows[i];
+          if(!!row)
+            tmp.push(row);
+        }
+        
+        $scope.renderedRows = tmp;
+
+        if(!$scope.$root.$$phase)
+          $scope.$digest();
+      }
+
       var renderer;
 
       $scope.renderRows = function(){
-        if($scope.gridHeight == '100%')
-          $scope.renderMode = 'all';
-
         if(typeof renderer == 'function'){
           renderer();
           return;
         }
+        if($scope.gridHeight == '100%')
+          $scope.renderMode = 'all';
 
         switch($scope.renderMode){
           case 'virtual':
@@ -167,10 +183,16 @@ pitDirectives.directive('pitGrid', function($http, $q, $compile, utilities){
           case 'scroll':
             renderer = renderScrolling;
             break;
-          default:
-            renderer = renderAll;
-            break;
+          case 'paged':
+            if(angular.isDefined($attrs.pitGridPageSize) && $attrs.pitGridPageSize*1 > 0){
+              renderer = renderPaged;
+            }else{
+              console.log('Render mode was set to pages, but pit-grid-page-size was not set to a value');
+            }
         }
+
+        if(typeof renderer != 'function')
+          renderer = renderAll;
 
         renderer();
       }
@@ -193,20 +215,29 @@ pitDirectives.directive('pitGrid', function($http, $q, $compile, utilities){
         'padding': '0px'
       }
 
-      // $scope.$on('pitGridDomReady', function(event, attrs){
-        $scope.$parent.$watch($attrs.pitGridDataSource, function(newVal){
-          if(!newVal || newVal.length == 0)
-            return;
+      function rowWatchHandler(newVal){
+        if(!newVal)
+          newVal = $scope.$parent.$eval($attrs.pitGridDataSource);
 
-          $scope.dataSourceRows = newVal;
-          $scope.tableStyle.height = $scope.dataSourceRows.length * $scope.rowHeight;
+        if(!newVal || newVal.length == 0)
+          return;
 
-          if(visibleRows == 0)
-            visibleRows = Math.ceil($scope.gridHeight / $scope.rowHeight);
+        $scope.dataSourceRows = newVal;
+        $scope.tableStyle.height = $scope.dataSourceRows.length * $scope.rowHeight;
 
-          $scope.renderRows();
-        });
-      // })
+        if(visibleRows == 0)
+          visibleRows = Math.ceil($scope.gridHeight / $scope.rowHeight);
+
+        $scope.renderRows();
+      }
+
+      // Watch both length and actual object, since removal triggers on length
+      $scope.$parent.$watch($attrs.pitGridDataSource + '.length', function(newVal){
+        rowWatchHandler();
+      });
+      $scope.$parent.$watch($attrs.pitGridDataSource, function(newVal){
+        rowWatchHandler(newVal);
+      });
     },
     link: function($scope, el, attrs){
       var template = attrs.pitGridTemplate;
@@ -215,13 +246,15 @@ pitDirectives.directive('pitGrid', function($http, $q, $compile, utilities){
       $http.get(template)
         .success(function(htmlTemplate){          
 
+          // Wrap the template in a managable structure
           htmlTemplate = $('<div><div class="pit-grid-container-buttons"></div><div class="pit-grid-container" style="overflow:auto; height:'+$scope.gridHeight+'px;">' + htmlTemplate + '</div></div>');
           
+          // Add an ng-disabled trigger on all input
           htmlTemplate.find('input').attr('ng-disabled', '!editable');
-          htmlTemplate.find('tr').attr('ng-class', 'getClassNames(row)');
+
 
           if(attrs.pitGridEditable == 'toggle'){
-            htmlTemplate.find('.pit-grid-container-buttons').append('<button ng-click="editable = !editable">Can edit: {{editable}}</button>');
+            htmlTemplate.find('.pit-grid-container-buttons').append('<button class="pit-grid-button btn" ng-click="editable = !editable">Can edit: {{editable}}</button>');
           }
 
           if(angular.isDefined(attrs.pitGridRowSelect)){
@@ -261,11 +294,28 @@ pitDirectives.directive('pitGrid', function($http, $q, $compile, utilities){
             htmlTemplate.find('.fixedColumnTable').wrap('<div style="overflow: hidden; float:left; height:'+$scope.gridHeight+'px;"/>');
 
             htmlTemplate.find('tbody tr').css('height', $scope.rowHeight + 'px');
+
+            htmlTemplate.find('tr').each(function(){ $(this).find('td:first, th:first').css('borderLeft', 'none'); });
           }
 
           htmlTemplate.find('table tbody').each(function(i,tbody){
             tbody = $(tbody);
-            tbody.find('tr:first').attr('ng-repeat', 'row in renderedRows');//+attrs.pitGridDataSource);
+            var rowAttrs = {
+               'ng-repeat': 'row in renderedRows'
+              ,'ng-class': 'getClassNames(row)'
+            };
+
+            if(angular.isDefined(attrs.pitGridRowHoverHighlight)){
+              rowAttrs['ng-mouseenter'] = 'row.hover = true';
+              rowAttrs['ng-mouseleave'] = 'row.hover = false';
+            }
+
+            if(angular.isDefined(attrs.pitGridRowColorOdds)){
+              rowAttrs['ng-class-odd'] = "'pit-grid-odd-row'";
+            }
+
+            tbody.find('tr:first').attr(rowAttrs);
+
             tbody.prepend('<tr ng-style="topRowStyle"><td colspan="100000" ng-style="topRowStyle">&nbsp;</td></tr>');
             tbody.append('<tr ng-style="bottomRowStyle"><td colspan="100000" ng-style="bottomRowStyle">&nbsp;</td></tr>');
           });
@@ -321,9 +371,11 @@ pitDirectives.directive('pitGrid', function($http, $q, $compile, utilities){
                       var css = {
                           'width': w,
                           'min-width': w,
-                          'max-width': w,
-                          'padding' : $(e).css('padding')
+                          'max-width': w
                       };
+                      if(i == 0)
+                        css.borderLeft = 'none;';
+
                       var $fixedCell = $('<th/>').css(css).text($(e).text());
                       $fixedHeader.append($fixedCell);
                     });
@@ -338,7 +390,6 @@ pitDirectives.directive('pitGrid', function($http, $q, $compile, utilities){
                       'width': headerWidth,
                       'min-width': headerWidth,
                       'max-width': headerWidth,
-                      'height': $tables.find('thead').height(),
                       'left' : baseOffsetLeft + containerOffsetLet
                     });
 
