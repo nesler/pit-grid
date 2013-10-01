@@ -145,12 +145,16 @@
       // Append it to the DOM
       $scope.tableDom.find('.pit-grid-container').append(loader);
       __self.isRendering = true;
+
+      __self.duration;
       var addToRender = function(rStart){
         if(rStart >= max){
           __self.isRendering = false;
           loader.remove();
           return;
         }
+
+        __self.startTime = new Date();
 
         var rEnd = (rStart+5 > $scope.dataSourceRows.length ? max : rStart+5);
         for(rStart; rStart < rEnd; ++rStart){
@@ -164,9 +168,11 @@
         if(!$scope.$root.$$phase)
           $scope.$digest();
 
+        __self.duration = (new Date() - __self.startTime);
+
         $timeout(function(){
           addToRender(rStart);
-        }, 500)
+        }, __self.duration/2)
       }
 
       addToRender(0);
@@ -316,7 +322,7 @@
 
 
             if(attrs.pitGridEditable == 'toggle'){
-              htmlTemplate.find('.pit-grid-container-buttons').append('<button class="pit-grid-button btn" ng-click="editable = !editable">Can edit: {{editable}}</button>');
+              htmlTemplate.find('.pit-grid-container-buttons').append('<button class="pit-grid-button btn" ng-click="editable = !editable">Editable: {{editable}}</button>');
             }
 
             if(angular.isDefined(attrs.pitGridRowSelect)){
@@ -329,7 +335,7 @@
             }
 
             if($scope.renderMode == 'paged' || $scope.renderMode == 'page'){
-              htmlTemplate.append('<div pit-page-indicator="totalPages" pit-grid-page-indicator-click="renderRows"></div>')
+              htmlTemplate.find('.pit-grid-container').append('<div pit-page-indicator="totalPages" pit-grid-page-indicator-click="renderRows" style="float:right;"></div>')
             }
 
             htmlTemplate.find('table tbody').each(function(i,tbody){

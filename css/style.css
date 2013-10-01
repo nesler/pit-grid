@@ -29,29 +29,6 @@ th, td {
   display:none;
 }
 
-/*.header, .menu, .footer {
-  position: fixed;
-  background-color: white;
-  z-index: 10;
-  padding:0px 10px;
-}
-
-.header {
-  top: 0px;
-  right: 0px;
-}
-
-.menu {
-  top: 0px;
-  left: 0px;
-  bottom: 0px;
-}
-
-.footer {
-  bottom: 0px;
-  right: 0px;
-}*/
-
 input {
   width:75px;
 }

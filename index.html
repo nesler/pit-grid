@@ -26,67 +26,23 @@
   </head>
 
   <body ng-controller="MainCtrl">
-    <div class="header">
-      <p>Loooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooooongstring</p>
-    </div>
-    <div class="menu">
-      <p>Hello {{name}}!</p>
-    </div>
-    <div class="header">
-      <p>Hello {{name}}!</p>
-    </div>
-    <div class="menu">
-      <p>Hello {{name}}!</p>
-    </div>
-    <div class="header">
-      <p>Hello {{name}}!</p>
-    </div>
-    <div class="menu">
-      <p>Hello {{name}}!</p>
-    </div>
-    <div class="header">
-      <p>Hello {{name}}!</p>
-    </div>
-    <div class="menu">
-      <p>Hello {{name}}!</p>
-    </div>
-    <div class="header">
-      <p>Hello {{name}}!</p>
-    </div>
-    <div class="menu">
-      <p>Hello {{name}}!</p>
-    </div>
-    <div class="header">
-      <p>Hello {{name}}!</p>
-    </div>
-    <div class="menu">
-      <p>Hello {{name}}!</p>
-    </div>
-    <div class="container" style="margin-left: 200px;">
-      <button ng-click="removeEvenRow()">Remove even row</button>
-      <input type="text" ng-model="visibleRows[1].MSTR_CHAR">
+    <div class="container">
       <div
         pit-grid
         pit-grid-data-source="visibleRows"
         pit-grid-template="table.html"
         pit-grid-config="config.json"
         pit-grid-editable="toggle"
-        pit-grid-height="200px"
+        pit-grid-page-size="8"
         pit-grid-fixed-header
         pit-grid-enable-fixed-columns
         pit-grid-row-select
-        pit-grid-render-mode="chunk"
+        pit-grid-render-mode="page"
         pit-grid-loading-propery="loading"
         pit-grid-row-hover-highlight
         pit-grid-row-color-odds
         >
-      </div>      
-      <br>
-      <button class="btn" ng-click="scope_progress = scope_progress+20">Go progress!</button>
-      <div pit-progress-indicator="scope_progress"></div>
-    </div>
-    <div class="footer">
-      <p>Hello {{name}}!</p>
+      </div>
     </div>
   </body>
 
