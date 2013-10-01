@@ -1,4 +1,3 @@
-//We're not able to use the "number" filter on inputs, so we'll just create a directive in stead
 pitDirectives.directive('pitProgressIndicator', function(){
   var template =  '<div class="progress">' +
                     '<div class="progress-bar" role="progressbar" aria-valuenow="{{progress}}" aria-valuemin="{{minValue}}" aria-valuemax="{{maxValue}}" ng-style="style()">' +
@@ -15,9 +14,13 @@ pitDirectives.directive('pitProgressIndicator', function(){
       $scope.style = function(){
         return { width: $scope.progressPercent+'%' };
       }
+      
       $scope.progress = 0;
       $scope.progressPercent = 0;
       $scope.$parent.$watch($attrs.pitProgressIndicator, function(newVal){
+        if(newVal > $scope.maxValue)
+          return;
+        
         $scope.progress = newVal;
         $scope.progressPercent = (newVal/$scope.maxValue)*100;
       });

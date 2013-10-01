@@ -1,7 +1,7 @@
 (function(){
   'use strict'
 
-  var pitGridController = function($scope, $element, $attrs, $q, $http, $log, utilities){
+  var pitGridController = function($scope, $element, $attrs, $q, $http, $log, $timeout, $compile, utilities){
     $scope.rowHeight = $attrs.pitGridRowHeight || 45;
     $scope.gridHeight = (angular.isDefined($attrs.pitGridHeight) ? $attrs.pitGridHeight.replace('px', '')*1 : '100%')
     $scope.renderMode = angular.isDefined($attrs.pitGridRenderMode) ? $attrs.pitGridRenderMode.toLowerCase() : 'virtual';
@@ -128,6 +128,50 @@
         $scope.$digest();
     }
 
+    $scope.renderProgress = 0;
+    function renderChuncked(){
+      var __self = this;
+      __self.isRendering = !!__self.isRendering;
+      if(__self.isRendering)
+        return;
+
+      var max = $scope.dataSourceRows.length;
+      // Create the loader-container
+      var loader = $('<div class="chunk-loader" style="position:absolute; left:0px; top:0px; right:0px; bottom:0px; cursor:wait;"/>');
+      // Add an semi-transparent background
+      loader.append('<div style=" background-color: white; opacity: 0.5; filter: alpha(opacity = 50); position:absolute; z-index:1; width:100%; height:100%;"/>')
+      // Compile and add the progress indicator
+      loader.append($compile('<div pit-progress-indicator="renderProgress" pit-progress-indicator-max-value="'+max+'" style="width:70%; margin-left:15%; margin-top:'+$scope.gridHeight/2+'px; position:absolute; z-index:2;"></div>')($scope));
+      // Append it to the DOM
+      $scope.tableDom.find('.pit-grid-container').append(loader);
+      __self.isRendering = true;
+      var addToRender = function(rStart){
+        if(rStart >= max){
+          __self.isRendering = false;
+          loader.remove();
+          return;
+        }
+
+        var rEnd = (rStart+5 > $scope.dataSourceRows.length ? max : rStart+5);
+        for(rStart; rStart < rEnd; ++rStart){
+          var row = $scope.dataSourceRows[rStart];
+          if(!!row)
+            $scope.renderedRows.push($scope.dataSourceRows[rStart]);
+        }
+
+        $scope.renderProgress = rStart;
+
+        if(!$scope.$root.$$phase)
+          $scope.$digest();
+
+        $timeout(function(){
+          addToRender(rStart);
+        }, 500)
+      }
+
+      addToRender(0);
+    }
+
     var renderer;
 
     $scope.renderRows = function(){
@@ -146,12 +190,18 @@
           $scope.topRowStyle.display = 'table-row';
           $scope.bottomRowStyle.display = 'table-row';
           break;
+        case 'page':
         case 'paged':
           if(angular.isDefined($attrs.pitGridPageSize) && $attrs.pitGridPageSize*1 > 0){
             renderer = renderPaged;
           }else{
             $log.info('Render mode was set to pages, but pit-grid-page-size was not set to a value');
           }
+          break;
+        case 'chunk':
+        case 'chunked':
+          renderer = renderChuncked;
+          break;
       }
 
       if(typeof renderer != 'function'){
@@ -259,7 +309,7 @@
           .success(function(htmlTemplate){          
 
             // Wrap the template in a managable structure
-            htmlTemplate = $('<div><div class="pit-grid-container-buttons"></div><div class="pit-grid-container" style="overflow:auto; height:'+$scope.gridHeight+'px;">' + htmlTemplate + '</div></div>');
+            htmlTemplate = $('<div><div class="pit-grid-container-buttons"></div><div class="pit-grid-container" style="overflow:auto; height:'+$scope.gridHeight+'px; position:relative;">' + htmlTemplate + '</div></div>');
             
             // Add an ng-disabled trigger on all input
             htmlTemplate.find('input').attr('ng-disabled', '!editable');
@@ -278,7 +328,7 @@
               addFixedColumnMarkup(htmlTemplate, $scope);
             }
 
-            if($scope.renderMode == 'paged'){
+            if($scope.renderMode == 'paged' || $scope.renderMode == 'page'){
               htmlTemplate.append('<div pit-page-indicator="totalPages" pit-grid-page-indicator-click="renderRows"></div>')
             }
 
