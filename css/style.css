@@ -25,6 +25,11 @@ th, td {
   background-color: #f9f9f9;
 }
 
+.pit-grid-sortstate, .pit-grid-hidden-column-toggler {
+  cursor: pointer;
+  margin-left: 5px;
+}
+
 .hidden {
   display:none;
 }

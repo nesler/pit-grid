@@ -31,9 +31,13 @@
         $scope.editable = false;
         break;
       case 'never':
-      default:
         $scope.editable = false;
         break;
+      default:
+        // Just in case the parent controller should manage this.
+        $scope.$parent.$watch($attrs.pitGridEditable, function(newVal){
+          $scope.editable = !!newVal;
+        });
     }
 
     $scope.getClassNames = function(row){
@@ -44,6 +48,47 @@
          "pit-grid-selected": !!row.selected
         ,"pit-grid-hover": !!row.hover
       }
+    }
+
+    var sortedBy = [];
+    var sortPrimers = {
+       'number': parseInt
+      ,'decimal': parseFloat
+    }
+    $scope.sortRows = function(sortByColumn, sortDataType){
+      var sortState = 'none';
+      var sortToChangeIndex;
+      var sortToChange = sortedBy.filter(function(e,i){ if(e.name == sortByColumn){ sortToChangeIndex = i; return true; } })[0];
+      if(!sortToChange){
+        sortedBy.push({
+           name: sortByColumn
+          ,reverse: false
+          ,primer: (!!sortDataType && typeof sortPrimers[sortDataType] == 'function' ? sortPrimers[sortDataType] : null)
+        });
+        sortState = 'asc';
+      }else{
+        // If sorting non-reverse, change to reverse
+        if(sortToChange.reverse === false){
+          sortToChange.reverse = true;
+          sortState = 'desc';
+        // If sorting reverse, remove sort
+        }else{
+          sortedBy.splice(sortToChangeIndex,1);
+        }
+      }
+
+      if(sortedBy.length > 0){
+        $scope.dataSourceRows.sort(utilities.sortBy.apply(this, sortedBy));
+      }else{
+        if($attrs.pitGridSortable.length > 0)
+          $scope.dataSourceRows.sort(utilities.sortBy.apply(this, $attrs.pitGridSortable.split(',')));
+        else
+          $scope.dataSourceRows.sort();
+      }
+
+      $scope.renderedRows = [];
+      renderer();
+      return sortState;
     }
 
     var selectedRows = [];
@@ -104,6 +149,8 @@
 
       if(!$scope.$root.$$phase)
         $scope.$digest();
+
+      $scope.$scrollContainer.scrollTop(scrollTop);
     }
 
     function renderAll(){
@@ -113,7 +160,7 @@
     $scope.totalPages = 0;
     $scope.pageSize = angular.isDefined($attrs.pitGridPageSize) ? $attrs.pitGridPageSize*1 : 0;
     function renderPaged(page){
-      $scope.currentPage = page || 0;
+      $scope.currentPage = page || $scope.currentPage || 0;
       $scope.totalPages = Math.ceil($scope.dataSourceRows.length/$scope.pageSize);
       var tmp = [];
       for(var i = $attrs.pitGridPageSize * $scope.currentPage; i < $attrs.pitGridPageSize * ($scope.currentPage+1); ++i){
@@ -129,12 +176,13 @@
     }
 
     $scope.renderProgress = 0;
+    var  isRendering = false
+        ,duration, startTime;
     function renderChuncked(){
-      var __self = this;
-      __self.isRendering = !!__self.isRendering;
-      if(__self.isRendering)
+      if(isRendering)
         return;
 
+      var scrollTop = $scope.$scrollContainer.scrollTop();
       var max = $scope.dataSourceRows.length;
       // Create the loader-container
       var loader = $('<div class="chunk-loader" style="position:absolute; left:0px; top:0px; right:0px; bottom:0px; cursor:wait;"/>');
@@ -144,17 +192,17 @@
       loader.append($compile('<div pit-progress-indicator="renderProgress" pit-progress-indicator-max-value="'+max+'" style="width:70%; margin-left:15%; margin-top:'+$scope.gridHeight/2+'px; position:absolute; z-index:2;"></div>')($scope));
       // Append it to the DOM
       $scope.tableDom.find('.pit-grid-container').append(loader);
-      __self.isRendering = true;
+      isRendering = true;
 
-      __self.duration;
       var addToRender = function(rStart){
         if(rStart >= max){
-          __self.isRendering = false;
+          isRendering = false;
           loader.remove();
+          $scope.$scrollContainer.scrollTop(scrollTop);
           return;
         }
 
-        __self.startTime = new Date();
+        startTime = new Date();
 
         var rEnd = (rStart+5 > $scope.dataSourceRows.length ? max : rStart+5);
         for(rStart; rStart < rEnd; ++rStart){
@@ -168,11 +216,11 @@
         if(!$scope.$root.$$phase)
           $scope.$digest();
 
-        __self.duration = (new Date() - __self.startTime);
+        duration = (new Date() - startTime);
 
         $timeout(function(){
           addToRender(rStart);
-        }, __self.duration/2)
+        }, duration/2)
       }
 
       addToRender(0);
@@ -257,13 +305,17 @@
       $scope.renderRows();
     }
 
-    // Watch both length and actual object, since removal triggers on length
-    $scope.$parent.$watch($attrs.pitGridDataSource + '.length', function(newVal){
-      rowWatchHandler();
+    // Dont start watching properties until the DOM is actually linked and ready for data!
+    $scope.$on('pitGridDomLinked', function(){
+      // Watch both length and actual object, since removal triggers on length
+      $scope.$parent.$watch($attrs.pitGridDataSource + '.length', function(newVal){
+        rowWatchHandler();
+      });
+      $scope.$parent.$watch($attrs.pitGridDataSource, function(newVal){
+        rowWatchHandler(newVal);
+      });
     });
-    $scope.$parent.$watch($attrs.pitGridDataSource, function(newVal){
-      rowWatchHandler(newVal);
-    });
+    
   }
 
   function addFixedColumnMarkup(htmlTemplate, $scope){
@@ -302,7 +354,40 @@
     htmlTemplate.find('tr').each(function(){ $(this).find('td:first, th:first').css('borderLeft', 'none'); });
   }
 
-  pitDirectives.directive('pitGrid', function($http, $compile){
+  var hiddenColumnIndex = 0;
+  function addHiddenColumnMarkup(htmlTemplate, $scope){
+    htmlTemplate
+      .find('th[pit-grid-hideable-column]')
+      .each(function(){
+        var  $this = $(this)
+            ,pTable = $this.parents('table:first')
+            ,index = $this.index();
+
+        $this.addClass('pit-grid-hidden-column-'+hiddenColumnIndex);
+        $this.append('<span class="glyphicon glyphicon-chevron-left pit-grid-collapse-column pit-grid-hidden-column-toggler"></span>');
+
+        var hiddenTH = $(
+          '<th pit-grid-hideable-column style="display:none; width:0px; max-width:0px; min-width:0px;" class="pit-grid-hidden-column-'+hiddenColumnIndex+'">'+
+            '<span class="glyphicon glyphicon-chevron-right pit-grid-expand-column pit-grid-hidden-column-toggler" style="margin:0px;"></span>'+
+          '</th>'
+        );
+
+        hiddenTH.tooltip({'title': $this.text(), 'container': 'body'});
+
+        $this.before(hiddenTH);
+        pTable.find('tbody td:eq('+index+')').addClass('pit-grid-hidden-column-'+hiddenColumnIndex).before('<td style="display:none;" class="pit-grid-hidden-column-'+hiddenColumnIndex+'"></td>');
+        hiddenColumnIndex++;
+      });
+
+    htmlTemplate.on('click', 'th[pit-grid-hideable-column] span', function(event){
+      var toggleClass = $(this).parent().prop('className').match(/pit\-grid\-hidden\-column\-\d+/)[0];
+      $('.' + toggleClass).toggle();
+
+      event.stopPropagation();
+    });
+  }
+
+  pitDirectives.directive('pitGrid', function($http, $compile, $log, utilities){
     return {
       restrict: 'A',
       scope: {},
@@ -315,23 +400,74 @@
           .success(function(htmlTemplate){          
 
             // Wrap the template in a managable structure
-            htmlTemplate = $('<div><div class="pit-grid-container-buttons"></div><div class="pit-grid-container" style="overflow:auto; height:'+$scope.gridHeight+'px; position:relative;">' + htmlTemplate + '</div></div>');
+            htmlTemplate = $(
+              '<div>'+
+                '<div class="pit-grid-container-buttons btn-group"></div>'+
+                '<div class="pit-grid-container" style="overflow:auto; height:'+$scope.gridHeight+'px; position:relative;">' + htmlTemplate + '</div>'+
+              '</div>'
+            );
             
+            // Make some basic checks, to see if the configured template is actually compilable!
+            var preCompileErrors = [];
+            if(htmlTemplate.find('[pit-grid-sort-source][pit-grid-hideable-column]').length > 0){
+              preCompileErrors.push('A heading is configured with both pit-grid-sort-source (being sortable) and pit-grid-hideable-colum (being hideable). These cannot be used on the same element!');
+            }
+
+            if(preCompileErrors.length > 0){
+              $log.error(preCompileErrors.join('\n'));
+              return;
+            }
+
             // Add an ng-disabled trigger on all input
             htmlTemplate.find('input').attr('ng-disabled', '!editable');
 
 
             if(attrs.pitGridEditable == 'toggle'){
-              htmlTemplate.find('.pit-grid-container-buttons').append('<button class="pit-grid-button btn" ng-click="editable = !editable">Editable: {{editable}}</button>');
+              htmlTemplate
+                .find('.pit-grid-container-buttons')
+                .append(
+                  '<button class="pit-grid-button btn btn-primary" ng-click="editable = !editable" data-toggle="button">'+
+                    '<span class="glyphicon glyphicon-edit"></span>'+
+                  '</button>'
+                );
             }
 
             if(angular.isDefined(attrs.pitGridRowSelect)){
-              htmlTemplate.find('tr').attr('ng-click', 'onRowSelected($event, row)');
+              htmlTemplate.find('tbody tr').attr('ng-click', 'onRowSelected($event, row)');
             }
 
             // change table layout to use fixed left columns
             if(angular.isDefined(attrs.pitGridEnableFixedColumns) && htmlTemplate.find('[pit-grid-fixed-column]').length > 0){
               addFixedColumnMarkup(htmlTemplate, $scope);
+            }
+
+            if(angular.isDefined(attrs.pitGridEnableColumnToggle) && htmlTemplate.find('[pit-grid-hideable-column]')){
+              addHiddenColumnMarkup(htmlTemplate, $scope);
+            }
+
+            if(angular.isDefined(attrs.pitGridSortable)){
+              htmlTemplate.on('click', 'th[pit-grid-sort-source] span', function(){
+                var  $this = $(this)
+                    ,$th = $this.parent();
+
+                var sortState = $scope.sortRows($th.attr('pit-grid-sort-source'), $th.attr('pit-grid-sort-data-type'));
+
+                var $state = $('<span class="pit-grid-sortstate glyphicon"></span>');
+
+                if(sortState == 'asc'){
+                  $state.addClass('glyphicon-sort-by-attributes pit-grid-sorting-asc')
+                }else if(sortState == 'desc'){
+                  $state.addClass('glyphicon-sort-by-attributes-alt pit-grid-sorting-desc')
+                }else{
+                  $state.addClass('glyphicon-sort pit-grid-sorting-none')
+                }
+
+                $th.find('span').remove();
+                $th.append($state);
+              });
+
+              htmlTemplate.find('th[pit-grid-sort-source]')
+                        .append('<span class="pit-grid-sortstate glyphicon glyphicon-sort pit-grid-sorting-none"></span>');
             }
 
             if($scope.renderMode == 'paged' || $scope.renderMode == 'page'){
@@ -361,12 +497,11 @@
             });
 
             htmlTemplate.find('tbody').attr('ng-style', 'tbodyStyle');
+
             $scope.pitGridCfgReady
               .then(function(){
                 $scope.tableDom = $compile(htmlTemplate)($scope);
                 el.replaceWith($scope.tableDom);
-
-                $scope.$emit('pitGridDomReady', attrs);
 
                 var  $container = $scope.tableDom.find('div.pit-grid-container')
                     ,$tables = $container.find('table')
@@ -403,20 +538,30 @@
                       var  $table = $(table)
                           ,$headings = $table.find('th')
                           ,$fixedHeader = $('<tr style="position: fixed; overflow: hidden; width:0px;" class="pit-grid-header pit-grid-fixed-header"/>');
-                          //,$fixedHeader = $('<div style="position: fixed; overflow: hidden; display:table-row; width:0px;" class="pit-grid-header pit-grid-fixed-header"/>');
 
                       // Get the widths of eacn header, and add a div with the same dimensions to the fixed header
                       $headings.each(function (i, e) {
+                        var $fixedCell = $(e).clone();
+
                         var w = $(e).innerWidth();
                         var css = {
                             'width': w,
                             'min-width': w,
-                            'max-width': w
+                            'max-width': w,
+                            'cursor': $(e).css('cursor')
                         };
                         if(i == 0)
-                          css.borderLeft = 'none;';
+                          css.borderLeft = 'none';
 
-                        var $fixedCell = $('<th/>').css(css).text($(e).text());
+                        $fixedCell.css(css);
+                        
+                        // Copy all of the attributes, except style
+                        var attributes = $(e).prop('attributes');
+                        $.each(attributes, function() {
+                          if(this.name.indexOf('style') == -1)
+                            $fixedCell.attr(this.name, this.value);
+                        });
+
                         $fixedHeader.append($fixedCell);
                       });
 
