@@ -87,7 +87,7 @@
       }
 
       $scope.renderedRows = [];
-      renderer();
+      $scope.renderRows();
       return sortState;
     }
 
@@ -128,6 +128,51 @@
       return $scope.tbodyStyle.height - scrollTop - (visibleRows * $scope.rowHeight);
     }
 
+    var TOP_ROWS = 3, BOTTOM_ROWS = 3, PREV_SCROLLED_ROWS = 0, FIRST_ROW_INDEX = 0, LAST_ROW_INDEX = 0, HASH_IDENT = null;
+    function renderVirually(){
+      var  scrollTop = $scope.$scrollContainer.scrollTop()
+          ,scrolledRows = 0;
+
+      if(scrollTop == 0){
+        FIRST_ROW_INDEX = 0;
+        LAST_ROW_INDEX = visibleRows + BOTTOM_ROWS;
+      }else{
+        scrolledRows = Math.ceil(scrollTop / $scope.rowHeight);
+
+        FIRST_ROW_INDEX = scrolledRows - TOP_ROWS;
+        if(FIRST_ROW_INDEX < 0)
+          FIRST_ROW_INDEX = 0;
+
+        LAST_ROW_INDEX = scrolledRows + visibleRows + BOTTOM_ROWS;
+        if(LAST_ROW_INDEX > $scope.dataSourceRows.length)
+          LAST_ROW_INDEX = $scope.dataSourceRows.length
+      }
+
+      //if(scrolledRows > 0 && PREV_SCROLLED_ROWS == scrolledRows){
+      if(HASH_IDENT != null && $scope.dataSourceRows[FIRST_ROW_INDEX].$$hashkey == HASH_IDENT){
+        return;
+      }
+
+      HASH_IDENT = ($scope.dataSourceRows[FIRST_ROW_INDEX].$$hashkey || null);
+
+      var tmp = []
+      for(var rowIndex = FIRST_ROW_INDEX; rowIndex < LAST_ROW_INDEX; ++rowIndex){
+        var row = $scope.dataSourceRows[rowIndex];
+        if(!!row)
+          tmp.push(row);
+      }
+
+      $scope.renderedRows = tmp;
+
+      $scope.topRowStyle.height = (FIRST_ROW_INDEX-1) * $scope.rowHeight;
+      $scope.bottomRowStyle.height = getOffsetBottom(scrollTop);
+
+      if(!$scope.$root.$$phase)
+        $scope.$digest();
+
+      PREV_SCROLLED_ROWS = scrolledRows;
+    }
+
     function renderScrolling(){
       var scrollTop = $scope.$scrollContainer.scrollTop();
 
@@ -160,7 +205,7 @@
     $scope.totalPages = 0;
     $scope.pageSize = angular.isDefined($attrs.pitGridPageSize) ? $attrs.pitGridPageSize*1 : 0;
     function renderPaged(page){
-      $scope.currentPage = page || $scope.currentPage || 0;
+      $scope.currentPage = (angular.isNumber(page) ? page : $scope.currentPage) || 0;
       $scope.totalPages = Math.ceil($scope.dataSourceRows.length/$scope.pageSize);
       var tmp = [];
       for(var i = $attrs.pitGridPageSize * $scope.currentPage; i < $attrs.pitGridPageSize * ($scope.currentPage+1); ++i){
@@ -227,43 +272,60 @@
     }
 
     var renderer;
-
+    var IS_RENDERING_PAGED = false;
+    var IS_RENDERING_ONSCROLL = false;
     $scope.renderRows = function(){
-      if(typeof renderer == 'function'){
-        renderer.apply(this, arguments);
-        return;
-      }
-
-      switch($scope.renderMode){
-        case 'scroll':
-          if($scope.gridHeight == '100%'){
-            $log.info('Render mode "' + $scope.renderMode + '"" can not be used without a fixed height');
-            break;
-          }
-          renderer = renderScrolling;
-          $scope.topRowStyle.display = 'table-row';
-          $scope.bottomRowStyle.display = 'table-row';
-          break;
-        case 'page':
-        case 'paged':
-          if(angular.isDefined($attrs.pitGridPageSize) && $attrs.pitGridPageSize*1 > 0){
-            renderer = renderPaged;
-          }else{
-            $log.info('Render mode was set to pages, but pit-grid-page-size was not set to a value');
-          }
-          break;
-        case 'chunk':
-        case 'chunked':
-          renderer = renderChuncked;
-          break;
-      }
-
+      var postInitialRender = function(){}
       if(typeof renderer != 'function'){
-        $log.warn('Could not match render mode "' + $scope.renderMode + '"" to anything valid.');
-        renderer = renderAll;
+        switch($scope.renderMode){
+          case 'virtual':
+            renderer = renderVirually;
+
+            $scope.topRowStyle.display = '';
+            $scope.bottomRowStyle.display = '';
+            IS_RENDERING_ONSCROLL = true;
+            break;
+          case 'scroll':
+            if($scope.gridHeight == '100%'){
+              $log.info('Render mode "' + $scope.renderMode + '"" can not be used without a fixed height');
+              break;
+            }
+            renderer = renderScrolling;
+            $scope.topRowStyle.display = 'table-row';
+            $scope.bottomRowStyle.display = 'table-row';
+            IS_RENDERING_ONSCROLL = true;
+            break;
+          case 'page':
+          case 'paged':
+            if(angular.isDefined($attrs.pitGridPageSize) && $attrs.pitGridPageSize*1 > 0){
+              renderer = renderPaged;
+              IS_RENDERING_PAGED = true;
+            }else{
+              $log.info('Render mode was set to pages, but pit-grid-page-size was not set to a value');
+            }
+            break;
+          case 'chunk':
+          case 'chunked':
+            renderer = renderChuncked;
+            break;
+        }
+
+        if(typeof renderer != 'function'){
+          $log.warn('Could not match render mode "' + $scope.renderMode + '"" to anything valid.');
+          renderer = renderAll;
+        }
+
+        postInitialRender = function(){
+          // Trigger scroll to automatically force the fixed header
+          // But wait to do so until the data is actually loaded into the table
+          $timeout(function(){
+            $scope.$scrollContainer.scroll();
+          }, 0);
+        }
       }
 
       renderer.apply(this, arguments);
+      postInitialRender();
     }
 
     $scope.tbodyStyle = {
@@ -294,10 +356,10 @@
         return;
 
       $scope.dataSourceRows = newVal;
-      if($scope.pageSize > 0)
+      if($scope.pageSize > 0 && IS_RENDERING_PAGED)
         $scope.tbodyStyle.height = $scope.pageSize * $scope.rowHeight;
       else
-        $scope.tbodyStyle.height = $attrs.pitGridDataSource.length * $scope.rowHeight;
+        $scope.tbodyStyle.height = $scope.dataSourceRows.length * $scope.rowHeight;
 
       if(visibleRows == 0)
         visibleRows = Math.ceil($scope.gridHeight / $scope.rowHeight);
@@ -316,6 +378,30 @@
       });
     });
     
+  }
+
+  function fixedHeaderPos(container){
+    var  pos = container.offset()
+        ,scrollTop = $(window).scrollTop()
+        ,scrollLeft = $(window).scrollLeft()
+        ,left = pos.left - scrollLeft
+        ,top = pos.top - scrollTop;
+
+    return {top: top, left: left};
+  }
+
+  function fixedHeadingStyle(fromElement, index){
+    var w = $(fromElement).outerWidth();
+    var css = {
+        'width': w,
+        'min-width': w,
+        'max-width': w,
+        'cursor': $(fromElement).css('cursor')
+    };
+    // if(index == 0)
+    //   css.borderLeft = 'none';
+
+    return css;
   }
 
   function addFixedColumnMarkup(htmlTemplate, $scope){
@@ -351,7 +437,7 @@
 
     htmlTemplate.find('tbody tr').css('height', $scope.rowHeight + 'px');
 
-    htmlTemplate.find('tr').each(function(){ $(this).find('td:first, th:first').css('borderLeft', 'none'); });
+    //htmlTemplate.find('tr').each(function(){ $(this).find('td:first, th:first').css('borderLeft', 'none'); });
   }
 
   var hiddenColumnIndex = 0;
@@ -359,29 +445,52 @@
     htmlTemplate
       .find('th[pit-grid-hideable-column]')
       .each(function(){
+        $scope['column' + hiddenColumnIndex + 'visible'] = true;
+
         var  $this = $(this)
             ,pTable = $this.parents('table:first')
             ,index = $this.index();
 
-        $this.addClass('pit-grid-hidden-column-'+hiddenColumnIndex);
-        $this.append('<span class="glyphicon glyphicon-chevron-left pit-grid-collapse-column pit-grid-hidden-column-toggler"></span>');
+        $this
+          .attr('ng-show', 'column' + hiddenColumnIndex + 'visible');
+        $this
+          .append('<span class="glyphicon glyphicon-chevron-left pit-grid-collapse-column pit-grid-hidden-column-toggler" ng-click="column' + hiddenColumnIndex + 'visible = !column' + hiddenColumnIndex + 'visible"></span>');
 
         var hiddenTH = $(
-          '<th pit-grid-hideable-column style="display:none; width:0px; max-width:0px; min-width:0px;" class="pit-grid-hidden-column-'+hiddenColumnIndex+'">'+
-            '<span class="glyphicon glyphicon-chevron-right pit-grid-expand-column pit-grid-hidden-column-toggler" style="margin:0px;"></span>'+
+          '<th pit-grid-hideable-column ng-hide="column' + hiddenColumnIndex + 'visible" style="width:0px; max-width:0px; min-width:0px;">'+
+            '<span title="'+$this.text()+'" class="glyphicon glyphicon-chevron-right pit-grid-expand-column pit-grid-hidden-column-toggler" style="margin:0px;" ng-click="column' + hiddenColumnIndex + 'visible = !column' + hiddenColumnIndex + 'visible"></span>'+
           '</th>'
         );
 
-        hiddenTH.tooltip({'title': $this.text(), 'container': 'body'});
-
         $this.before(hiddenTH);
-        pTable.find('tbody td:eq('+index+')').addClass('pit-grid-hidden-column-'+hiddenColumnIndex).before('<td style="display:none;" class="pit-grid-hidden-column-'+hiddenColumnIndex+'"></td>');
+        pTable
+          .find('tbody td:eq('+index+')')
+          .attr('ng-show', 'column' + hiddenColumnIndex + 'visible')
+          .before('<td ng-hide="column' + hiddenColumnIndex + 'visible"></td>');
+
         hiddenColumnIndex++;
       });
 
     htmlTemplate.on('click', 'th[pit-grid-hideable-column] span', function(event){
-      var toggleClass = $(this).parent().prop('className').match(/pit\-grid\-hidden\-column\-\d+/)[0];
-      $('.' + toggleClass).toggle();
+      var $this = $(this)
+          ,pTable = $this.parents('table:first');
+
+      var fixedHeadings = pTable.find('.pit-grid-fixed-header th');
+      
+      pTable
+        .find('.pit-grid-regular-header th')
+        .each(function(i,e){
+        var $fixedCell = fixedHeadings.eq(i);
+        var css = fixedHeadingStyle(e, i);
+
+        $fixedCell.css(css);
+      });
+      
+      if($this.tooltip){
+        pTable.find('th[pit-grid-hideable-column] span[title]').each(function(){
+          $(this).tooltip({'container': 'body'});
+        });
+      }
 
       event.stopPropagation();
     });
@@ -514,16 +623,6 @@
                 // add fixed header and set fixed widths
                 if(angular.isDefined(attrs.pitGridFixedHeader)){
 
-                  var fixedHeaderPos = function(container){
-                    var  pos = container.offset()
-                        ,scrollTop = $(window).scrollTop()
-                        ,scrollLeft = $(window).scrollLeft()
-                        ,left = pos.left - scrollLeft
-                        ,top = pos.top - scrollTop;
-
-                    return {top: top, left: left};
-                  }
-
                   // Trigger all the bindings on first scroll.
                   // This make 98% sure, that rows are loaded and widths are steady
                   $scrollContainer.bind('scroll', function(){
@@ -539,19 +638,12 @@
                           ,$headings = $table.find('th')
                           ,$fixedHeader = $('<tr style="position: fixed; overflow: hidden; width:0px;" class="pit-grid-header pit-grid-fixed-header"/>');
 
+                      $table.find('thead tr').addClass('pit-grid-regular-header');
+
                       // Get the widths of eacn header, and add a div with the same dimensions to the fixed header
                       $headings.each(function (i, e) {
                         var $fixedCell = $(e).clone();
-
-                        var w = $(e).innerWidth();
-                        var css = {
-                            'width': w,
-                            'min-width': w,
-                            'max-width': w,
-                            'cursor': $(e).css('cursor')
-                        };
-                        if(i == 0)
-                          css.borderLeft = 'none';
+                        var css = fixedHeadingStyle(e, i);
 
                         $fixedCell.css(css);
                         
@@ -567,7 +659,7 @@
 
                       // Get the width of the fixed header. Either the same width as the table, or if overflowing, the width of the container
                       var headerWidth = 0;
-                      headerWidth = $table.width();
+                      headerWidth = $table.outerWidth();
                       if(headerWidth > $container.width() - baseOffsetLeft - $scope.scrollBarWidth)
                         headerWidth = $container.width() - baseOffsetLeft - $scope.scrollBarWidth;
 
@@ -592,8 +684,7 @@
                       $(window).scroll();
 
                       baseOffsetLeft += headerWidth;
-                      $table.find('thead').append($fixedHeader);
-                      //$table.before($fixedHeader);
+                      $table.find('thead').append($compile($fixedHeader)($scope));
                     });                 
 
                     var $scrollHeader = $scrollContainer.find('.pit-grid-fixed-header');
@@ -621,7 +712,6 @@
                       if(!$scope.isFixedColInitialized){
                         if($mainTable.width() > $scrollContainer.width())
                           $fixedColTable.parent().css('height', '-='+$scope.scrollBarWidth);
-                          //$scrollContainer.css('height', '+='+$scope.scrollBarWidth);
 
                         $scope.isFixedColInitialized = true;
                       }
