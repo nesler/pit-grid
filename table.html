@@ -1,10 +1,12 @@
 <table ng-controller="TableCtrl" class="table table-bordered">
   <thead>
     <tr>
+      <th></th>
       <th pit-grid-sort-source="Barcode" pit-grid-sort-data-type="number" pit-grid-fixed-column>Barcode</th>
       <th pit-grid-fixed-column>Insp Lot</th>
       <th pit-grid-sort-source="realIndex">asd</th>
       <th pit-grid-sort-source="MSTR_CHAR">Char</th>
+      <th>Sample ID</th>
       <th pit-grid-hideable-column>FIANITRAT</th>
       <th pit-grid-hideable-column>FIANITRIT</th>
       <th>WEIGHT</th>
@@ -14,10 +16,12 @@
   </thead>
   <tbody>
     <tr><!--   ng-repeat="row in rows | filter:isRowHidden"> -->
+      <td><input type="checkbox" ng-checked="row.selected" ng-click="row.selected = !row.selected"/></td>
       <td pit-trim-leading-zeros>{{row.Barcode}}</td>
       <td pit-trim-leading-zeros>{{row.INSPLOT}}</td>
       <td>{{row.realIndex}}</td>
       <td>{{row.MSTR_CHAR}}</td>
+      <td>{{row.SAMPLEID}}</td>
       <td><input type="text" ng-model="row.FIANITRAT" pit-only-numbers/></td>
       <td><input type="text" ng-model="row.FIANITRIT" pit-only-numbers/></td>
       <td><input type="text" ng-model="row.WEIGHT" pit-only-numbers/></td>

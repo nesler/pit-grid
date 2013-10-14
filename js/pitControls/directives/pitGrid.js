@@ -23,21 +23,23 @@
       q.resolve();
     }
 
-    switch($attrs.pitGridEditable){
-      case 'always':
-        $scope.editable = true;
-        break;
-      case 'toggle':
-        $scope.editable = false;
-        break;
-      case 'never':
-        $scope.editable = false;
-        break;
-      default:
-        // Just in case the parent controller should manage this.
-        $scope.$parent.$watch($attrs.pitGridEditable, function(newVal){
-          $scope.editable = !!newVal;
-        });
+    if(angular.isDefined($attrs.pitGridEditable)){
+      switch($attrs.pitGridEditable){
+        case 'always':
+          $scope.editable = true;
+          break;
+        case 'toggle':
+          $scope.editable = false;
+          break;
+        case 'never':
+          $scope.editable = false;
+          break;
+        default:
+          // Just in case the parent controller should manage this.
+          $scope.$parent.$watch($attrs.pitGridEditable, function(newVal){
+            $scope.editable = !!newVal;
+          });
+      }
     }
 
     $scope.getClassNames = function(row){
@@ -45,8 +47,8 @@
         return {};
 
       return {
-         "pit-grid-selected": !!row.selected
-        ,"pit-grid-hover": !!row.hover
+          "pit-grid-hover": !!row.hover
+         ,"pit-grid-selected": !!row.selected
       }
     }
 
@@ -86,13 +88,20 @@
           $scope.dataSourceRows.sort();
       }
 
+      // Get the current scrollTop before re-rendering
+      var scrollTop = $scope.$scrollContainer.scrollTop();
+
       $scope.renderedRows = [];
       $scope.renderRows();
+
+      // Scroll back down
+      $scope.$scrollContainer.scrollTop(scrollTop);
       return sortState;
     }
 
     var selectedRows = [];
     $scope.onRowSelected = function($event, row){
+      console.log(row);
       if(selectedRows.length == 0){
         row.selected = true;
       }else if(!$event.ctrlKey && !$event.shiftKey){
@@ -148,7 +157,6 @@
           LAST_ROW_INDEX = $scope.dataSourceRows.length
       }
 
-      //if(scrolledRows > 0 && PREV_SCROLLED_ROWS == scrolledRows){
       if(HASH_IDENT != null && $scope.dataSourceRows[FIRST_ROW_INDEX].$$hashkey == HASH_IDENT){
         return;
       }
@@ -195,7 +203,7 @@
       if(!$scope.$root.$$phase)
         $scope.$digest();
 
-      $scope.$scrollContainer.scrollTop(scrollTop);
+      //$scope.$scrollContainer.scrollTop(scrollTop);
     }
 
     function renderAll(){
@@ -291,8 +299,8 @@
               break;
             }
             renderer = renderScrolling;
-            $scope.topRowStyle.display = 'table-row';
-            $scope.bottomRowStyle.display = 'table-row';
+            $scope.topRowStyle.display = '';
+            $scope.bottomRowStyle.display = '';
             IS_RENDERING_ONSCROLL = true;
             break;
           case 'page':
@@ -396,10 +404,10 @@
         'width': w,
         'min-width': w,
         'max-width': w,
-        'cursor': $(fromElement).css('cursor')
+        'cursor': $(fromElement).css('cursor'),
+        'overflow': 'hidden',
+        'text-overflow': 'ellipsis'
     };
-    // if(index == 0)
-    //   css.borderLeft = 'none';
 
     return css;
   }
@@ -436,8 +444,8 @@
     htmlTemplate.find('.fixedColumnTable').wrap('<div style="overflow: hidden; float:left; height:'+$scope.gridHeight+'px;"/>');
 
     htmlTemplate.find('tbody tr').css('height', $scope.rowHeight + 'px');
-
-    //htmlTemplate.find('tr').each(function(){ $(this).find('td:first, th:first').css('borderLeft', 'none'); });
+    
+    htmlTemplate.find('.fixedColumnTable td, .fixedColumnTable th').css('border-right', 'none');
   }
 
   var hiddenColumnIndex = 0;
@@ -475,7 +483,8 @@
       var $this = $(this)
           ,pTable = $this.parents('table:first');
 
-      var fixedHeadings = pTable.find('.pit-grid-fixed-header th');
+      var  fixedHeadings = pTable.find('.pit-grid-fixed-header th')
+          ,indexCells = pTable.find('tbody tr.ng-scope:first td');
       
       pTable
         .find('.pit-grid-regular-header th')
@@ -527,18 +536,24 @@
               return;
             }
 
-            // Add an ng-disabled trigger on all input
-            htmlTemplate.find('input').attr('ng-disabled', '!editable');
+            htmlTemplate.find('tbody td').each(function(i){
+              $(this).attr('ng-style', 'pitGridCellStyle'+i);
+            })
+
+            if(angular.isDefined(attrs.pitGridEditable)){
+              // Add an ng-disabled trigger on all input
+              htmlTemplate.find('input').attr('ng-disabled', '!editable');
 
 
-            if(attrs.pitGridEditable == 'toggle'){
-              htmlTemplate
-                .find('.pit-grid-container-buttons')
-                .append(
-                  '<button class="pit-grid-button btn btn-primary" ng-click="editable = !editable" data-toggle="button">'+
-                    '<span class="glyphicon glyphicon-edit"></span>'+
-                  '</button>'
-                );
+              if(attrs.pitGridEditable == 'toggle'){
+                htmlTemplate
+                  .find('.pit-grid-container-buttons')
+                  .append(
+                    '<button class="pit-grid-button btn btn-primary" ng-click="editable = !editable" data-toggle="button">'+
+                      '<span class="glyphicon glyphicon-edit"></span>'+
+                    '</button>'
+                  );
+              }
             }
 
             if(angular.isDefined(attrs.pitGridRowSelect)){
@@ -632,6 +647,7 @@
 
                     var baseOffsetLeft = 0;
                     var containerOffsetLet = $container.offset().left;
+                    var cellIndex = 0;
                     // For each table available, add a header. This will add a fixed header to the fixed columns table as well, if present
                     $tables.each(function(i,table){
                       var  $table = $(table)
@@ -646,7 +662,10 @@
                         var css = fixedHeadingStyle(e, i);
 
                         $fixedCell.css(css);
-                        
+                        if(!$fixedCell.hasClass('ng-hide')){
+                          $scope['pitGridCellStyle'+(cellIndex++)] = css;
+                        };
+
                         // Copy all of the attributes, except style
                         var attributes = $(e).prop('attributes');
                         $.each(attributes, function() {

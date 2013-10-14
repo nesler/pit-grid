@@ -14,7 +14,7 @@ th, td {
 }
 
 .pit-grid-selected {
-  background-color: red;
+  background-color: red !important;
 }
 
 .pit-grid-hover {
