@@ -163,13 +163,55 @@
 
       HASH_IDENT = ($scope.dataSourceRows[FIRST_ROW_INDEX].$$hashkey || null);
 
+      // Attempt to only add/remove single elements when scrolling, not refresh the entire renderedRows array
+      // var  toChange = scrolledRows - PREV_SCROLLED_ROWS
+      //     ,spliceStart
+      //     ,changeMethod
+      //     ,newElems = []
+      //     ,isInitialized;
+      // console.log('toChange', toChange);
+      // if(toChange < 0){
+      //   toChange = toChange*-1;
+      //   changeMethod = Array.prototype.unshift;
+      //   spliceStart = ($scope.renderedRows.length-toChange);
+      //   for(var i = FIRST_ROW_INDEX; i < FIRST_ROW_INDEX+toChange; ++i){
+      //     var row = $scope.dataSourceRows[i];
+      //     if(!!row)
+      //       newElems.push(row);
+      //   }
+      // }else if(toChange > 0){
+      //   changeMethod = Array.prototype.push;
+      //   spliceStart = 0;
+      //   for(var i = LAST_ROW_INDEX-toChange; i < LAST_ROW_INDEX; ++i){
+      //     var row = $scope.dataSourceRows[i];
+      //     if(!!row)
+      //       newElems.push(row);
+      //   }
+      // }
+
+      // if(toChange > 0){
+      //   console.log(spliceStart, newElems);
+      //   $scope.renderedRows.splice(spliceStart, toChange);
+      //   changeMethod.apply($scope.renderedRows, newElems);
+      // }else{
+      //   if(!isInitialized){
+      //     var tmp = []
+      //     for(var rowIndex = FIRST_ROW_INDEX; rowIndex < LAST_ROW_INDEX; ++rowIndex){
+      //       var row = $scope.dataSourceRows[rowIndex];
+      //       if(!!row)
+      //         tmp.push(row);
+      //     }
+      //     $scope.renderedRows = tmp;
+      //     isInitialized = true;
+      //   }
+      // }
+
       var tmp = []
       for(var rowIndex = FIRST_ROW_INDEX; rowIndex < LAST_ROW_INDEX; ++rowIndex){
         var row = $scope.dataSourceRows[rowIndex];
         if(!!row)
           tmp.push(row);
       }
-
       $scope.renderedRows = tmp;
 
       $scope.topRowStyle.height = (FIRST_ROW_INDEX-1) * $scope.rowHeight;
@@ -637,12 +679,12 @@
 
                 // add fixed header and set fixed widths
                 if(angular.isDefined(attrs.pitGridFixedHeader)){
-
+                  var isFixedHeaderInitialized = false;
                   // Trigger all the bindings on first scroll.
                   // This make 98% sure, that rows are loaded and widths are steady
                   $scrollContainer.bind('scroll', function(){
                     // Only do this once!
-                    if($scope.isFixedHeaderInitialized)
+                    if(isFixedHeaderInitialized)
                       return;
 
                     var baseOffsetLeft = 0;
@@ -713,26 +755,25 @@
                       $scrollHeader.scrollLeft(left);
                     });
 
-                    $scope.isFixedHeaderInitialized = true;
+                    isFixedHeaderInitialized = true;
                   }); 
                 }
 
                 // add scroll-handler for fixed columns, to not scroll them
                 if(angular.isDefined(attrs.pitGridEnableFixedColumns)){
-
+                  var isFixedColInitialized = false;
                   if($fixedColTable.length > 0){
                     var $fixedColScroller = $fixedColTable.parent();
-                    $scope.isFixedColInitialized = false;
                     $scrollContainer.bind('scroll', function(){
                       var $this = $(this);
                       var top = $this.scrollTop();
                       $fixedColScroller.scrollTop(top);
 
-                      if(!$scope.isFixedColInitialized){
+                      if(!isFixedColInitialized){
                         if($mainTable.width() > $scrollContainer.width())
                           $fixedColTable.parent().css('height', '-='+$scope.scrollBarWidth);
 
-                        $scope.isFixedColInitialized = true;
+                        isFixedColInitialized = true;
                       }
                     });
                   }
