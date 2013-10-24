@@ -17,17 +17,19 @@ module.exports = function(config) {
       'http://code.jquery.com/jquery-1.10.2.min.js',
       'https://ajax.googleapis.com/ajax/libs/angularjs/1.2.0-rc.3/angular.min.js',
       'angular-mocks.js',
+      'helpers.js',
       '../lib/pitControls/utils.js',
       '../lib/pitControls/namespaces.js',
       '../lib/pitControls/**.js',
-      '../lib/pitControls/**/**.js',
-      './*.spec.js'
+      '../lib/pitControls/services/*.js',
+      '../lib/pitControls/directives/**.js',
+      './**/**.spec.js'
     ],
 
 
     // list of files to exclude
     exclude: [
-      
+      '**/**.conf.js'
     ],
 
 

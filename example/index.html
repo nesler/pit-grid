@@ -28,7 +28,7 @@
   <body ng-controller="MainCtrl">
     <button class="btn" ng-click="scopeEditable = !scopeEditable">Can edit: {{scopeEditable ? 'yes' : 'no'}}</button>
     <div class="container">
-      <div
+      <!--div
         pit-grid
         pit-grid-data-source="visibleRows"
         pit-grid-template="table.html"
@@ -45,6 +45,15 @@
         pit-grid-row-color-odds
         pit-grid-sortable="barcode,realIndex"
         pit-grid-enable-column-toggle
+        >
+      </div-->
+      <div
+        pit-grid
+        pit-grid-data-source="visibleRows"
+        pit-grid-template="table.html"
+        pit-grid-config="config.json"
+        pit-grid-height="200px"
+        pit-grid-render-mode="virtual"
         >
       </div>
     </div>
