@@ -215,3 +215,7 @@ pip-log.txt
 .mr.developer.cfg
 *.sublime*
 **/node_modules/**
+**/coverage/**
+*.js.html
+*.html
+!example/*.html

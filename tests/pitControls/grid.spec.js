@@ -23,23 +23,25 @@ describe("grid DOM", function() {
     template = 
       '<table>'+
         '<thead>'+
-          '<th pit-grid-fixed-column>a</th>'+
-          '<th>b</th>'+
+          '<th pit-grid-fixed-column pit-grid-sort-source="a">a</th>'+
+          '<th pit-grid-sort-source="b" pit-grid-sort-data-type="number">b</th>'+
+          '<th pit-grid-hideable-column>c</th>'+
         '</thead>'+
         '<tbody>'+
           '<tr>'+
             '<td>{{a}}</td>'+
             '<td><input type="text" ng-model="b"/></td>'+
+            '<td>{{c}}</td>'+
           '</tr>'+
         '</tody>'+
       '</table>';
 
     data = [
-       { a: 1, b: 2 }
-      ,{ a: 3, b: 4 } 
+       { a: 1, b: 10 }
+      ,{ a: 3, b: 8 } 
       ,{ a: 5, b: 6 }
-      ,{ a: 7, b: 8 }
-      ,{ a: 9, b: 10 }
+      ,{ a: 7, b: 4 }
+      ,{ a: 9, b: 2 }
     ]
   })
 
@@ -345,6 +347,63 @@ describe("grid DOM", function() {
       });
 
       expect(elm.find('.pit-grid-row-selected').length).toBe(3);
+    });
+  });
+  
+  describe("row sorting", function() {
+    it("should apply default sorting b,a", function() {
+      createDirectiveDom({'pit-grid-sortable': 'b,a'});
+
+      expect(elm.find('input:first').val()).toBe('2');
+    });
+
+    it("should sort by b when clicking the column header", function() {
+      createDirectiveDom({'pit-grid-sortable': ''});
+
+      expect(elm.find('input:first').val()).toBe('10');
+
+      scope.$apply(function(){
+        elm.find('[pit-grid-sort-source="b"] span').click();
+      });
+
+      expect(elm.find('input:first').val()).toBe('2');
+
+      scope.$apply(function(){
+        elm.find('[pit-grid-sort-source="b"] span').click();
+      });
+
+      expect(elm.find('input:first').val()).toBe('10');
+
+      scope.$apply(function(){
+        elm.find('[pit-grid-sort-source="b"] span').click();
+      });
+
+      expect(elm.find('input:first').val()).toBe('10');
+    });
+  });
+
+  describe("row hiding", function() {
+    it("shows an arrow on hidable columns", function() {
+      createDirectiveDom({'pit-grid-enable-column-toggle': ''});
+
+      expect(elm.find('.pit-grid-hidden-column-toggler').length).toBeGreaterThan(0);
+    });
+
+    it("toggles the column when clicking the arrow", function() {
+      createDirectiveDom({'pit-grid-enable-column-toggle': ''});
+
+      expect(elm.find('th[ng-hide="column1visible"]').hasClass('ng-hide')).toBe(true);
+      expect(elm.find('th[ng-show="column1visible"]').hasClass('ng-hide')).toBe(false);
+
+      elm.find('.pit-grid-collapse-column').click();
+
+      expect(elm.find('th[ng-hide="column1visible"]').hasClass('ng-hide')).toBe(false);
+      expect(elm.find('th[ng-show="column1visible"]').hasClass('ng-hide')).toBe(true);
+
+      elm.find('.pit-grid-expand-column').click();
+
+      expect(elm.find('th[ng-hide="column1visible"]').hasClass('ng-hide')).toBe(true);
+      expect(elm.find('th[ng-show="column1visible"]').hasClass('ng-hide')).toBe(false);
     });
   });
 });
