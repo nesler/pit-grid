@@ -180,13 +180,13 @@ describe("grid DOM", function() {
     it("renders all (default)", function() {
       createDirectiveDom();
 
-      expect(elm.find('tr.pit-grid-row').length).toBe(scope.data.length);
+      expect(elm.find('tr[ng-repeat="row in renderedRows"]').length).toBe(scope.data.length);
     });
 
     it("renders virtually", function() {
       createDirectiveDom({'pit-grid-render-mode': 'virtual', 'pit-grid-height': '200px'});
 
-      var initialRows = elm.find('tr.pit-grid-row').length;
+      var initialRows = elm.find('tr[ng-repeat="row in renderedRows"]').length;
 
       expect(initialRows).toBeLessThan(scope.data.length);
 
@@ -194,26 +194,26 @@ describe("grid DOM", function() {
         scope.scrollTop = 2000;
       });
 
-      expect(elm.find('tr.pit-grid-row').length).toBe(initialRows+3);
+      expect(elm.find('tr[ng-repeat="row in renderedRows"]').length).toBe(initialRows+3);
 
       scope.$apply(function(){
         // Scroll to the bottom
         scope.scrollTop = elm.find('tbody').height() - elm.find('.pit-grid-container').height();
       });
 
-      expect(elm.find('tr.pit-grid-row').length).not.toBeGreaterThan(initialRows);
+      expect(elm.find('tr[ng-repeat="row in renderedRows"]').length).not.toBeGreaterThan(initialRows);
 
       scope.$apply(function(){
         scope.scrollTop = 0;
       });
 
-      expect(elm.find('tr.pit-grid-row').length).not.toBeGreaterThan(initialRows);
+      expect(elm.find('tr[ng-repeat="row in renderedRows"]').length).not.toBeGreaterThan(initialRows);
     });
 
     it("renders scrolling", function() {
       createDirectiveDom({'pit-grid-render-mode': 'scroll', 'pit-grid-height': '200px'});
 
-      var initialRows = elm.find('tr.pit-grid-row').length;
+      var initialRows = elm.find('tr[ng-repeat="row in renderedRows"]').length;
 
       expect(initialRows).toBeLessThan(scope.data.length);
 
@@ -221,43 +221,44 @@ describe("grid DOM", function() {
         scope.scrollTop = 2000;
       });
 
-      expect(elm.find('tr.pit-grid-row').length).toBeGreaterThan(initialRows);
-      expect(elm.find('tr.pit-grid-row').length).toBeLessThan(scope.data.length);
+      expect(elm.find('tr[ng-repeat="row in renderedRows"]').length).toBeGreaterThan(initialRows);
+      expect(elm.find('tr[ng-repeat="row in renderedRows"]').length).toBeLessThan(scope.data.length);
 
       scope.$apply(function(){
         // Scroll to the bottom
         scope.scrollTop = elm.find('tbody').height() - elm.find('.pit-grid-container').height();
       });
 
-      expect(elm.find('tr.pit-grid-row').length).toBe(scope.data.length);
+      expect(elm.find('tr[ng-repeat="row in renderedRows"]').length).toBe(scope.data.length);
     });
 
     it("renders paged", function() {
       createDirectiveDom({'pit-grid-render-mode': 'page', 'pit-grid-page-size': '10'});
 
-      expect(elm.find('tr.pit-grid-row').length).toBe(10);
+      expect(elm.find('tr[ng-repeat="row in renderedRows"]').length).toBe(10);
 
       expect(scope.totalPages).toBe(Math.ceil(scope.data.length/10));
 
       scope.renderRows(4);
 
-      expect(elm.find('tr.pit-grid-row').length).toBe(10);
+      expect(elm.find('tr[ng-repeat="row in renderedRows"]').length).toBe(10);
     });
 
-    it("renders in chunks", function() {
+    it("renders in chunks", inject(function($timeout) {
       runs(function(){
         createDirectiveDom({'pit-grid-render-mode': 'chunk', 'pit-grid-height': '200px'});
         expect(elm.find('[pit-progress-indicator]').length).toBeGreaterThan(0);
       });
 
       waitsFor(function(){
-        return elm.find('[pit-progress-indicator]').length == 0
-      }, 'waiting', 2000)
+        $timeout.flush();
+        return elm.find('[pit-progress-indicator]').length == 0;
+      }, 'waiting', 10000)
 
       runs(function(){
         expect(elm.find('.pit-grid-row').length).toBe(scope.data.length);
       });
-    });
+    }));
   });
 
   describe("row-hover", function() {
@@ -268,12 +269,14 @@ describe("grid DOM", function() {
 
       scope.$apply(function(){
         scope.data[1].pitGridRowHover = true;
+        scope.getClassNames(scope.data[1]);
       })
 
       expect(elm.find('.pit-grid-row:eq(1)')).toHaveClass('pit-grid-row-hover');
 
       scope.$apply(function(){
         scope.data[1].pitGridRowHover = false;
+        scope.getClassNames(scope.data[1]);
       })
 
       expect(elm.find('.pit-grid-row:eq(1)')).not.toHaveClass('pit-grid-row-hover');
@@ -332,6 +335,7 @@ describe("grid DOM", function() {
 
       scope.$apply(function(){
         scope.data[2].pitGridRowSelected = true;
+        scope.getClassNames(data[2]);
       });
 
       expect(elm.find('.pit-grid-row-selected').length).toBe(1);
@@ -342,8 +346,11 @@ describe("grid DOM", function() {
 
       scope.$apply(function(){
         scope.data[0].pitGridRowSelected = true;
+        scope.getClassNames(data[0]);
         scope.data[2].pitGridRowSelected = true;
+        scope.getClassNames(data[2]);
         scope.data[4].pitGridRowSelected = true;
+        scope.getClassNames(data[4]);
       });
 
       expect(elm.find('.pit-grid-row-selected').length).toBe(3);

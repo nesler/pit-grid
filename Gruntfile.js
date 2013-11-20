@@ -13,6 +13,12 @@ module.exports = function(grunt){
       html: {
         files: ['example/index.html'],
         tasks: ['htmlhint']
+      },
+      //run unit tests with karma (server needs to be already running)
+      karma: {
+        files: ['lib/**/*.js', 'tests/**/*.js'],//['app/js/**/*.js', 'test/browser/**/*.js'],
+        exclude: ['tests/*.conf.js'],
+        tasks: ['karma:unit:run'] //NOTE the :run flag
       }
     },
 
@@ -42,6 +48,13 @@ module.exports = function(grunt){
             ,'lib/pitControls/directives/*.js'
           ]
         }
+      }
+    },
+
+    karma: {
+      unit: {
+        configFile: 'tests/run.conf.js',
+        background: true
       }
     }
   });
