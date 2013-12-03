@@ -13,6 +13,8 @@
       <th>WEIGHT</th>
       <th>9NITRAT</th>
       <th>9NITRIT</th>
+      <th pit-grid-sort-source="Barcode" pit-grid-sort-data-type="number">Barcode</th>
+      <th>Insp Lot</th>
     </tr>
   </thead>
   <tbody>
@@ -29,6 +31,8 @@
       <td><input type="text" ng-model="WEIGHT" pit-only-numbers/></td>
       <td ng-model="9NITRAT" pit-calculated pit-calculated-formula="pitGridConfig.CALCULATIONS.9NITRAT" pit-calculated-decimals="2" sap-result>{{9NITRAT}}</td>
       <td ng-model="9NITRIT" pit-calculated pit-calculated-formula="pitGridConfig.CALCULATIONS.9NITRIT" pit-calculated-decimals="2" sap-result>{{9NITRIT}}</td>
+      <td pit-trim-leading-zeros>{{Barcode}}</td>
+      <td pit-trim-leading-zeros>{{INSPLOT}}</td>
     </tr>
   </tbody>
 </table>

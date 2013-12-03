@@ -226,7 +226,7 @@ describe("grid DOM", function() {
 
       scope.$apply(function(){
         // Scroll to the bottom
-        scope.scrollTop = elm.find('tbody').height() - elm.find('.pit-grid-container').height();
+        scope.scrollTop = elm.find('table').height() - elm.find('.pit-grid-container').height();
       });
 
       expect(elm.find('tr[ng-repeat="row in renderedRows"]').length).toBe(scope.data.length);
@@ -268,15 +268,13 @@ describe("grid DOM", function() {
       expect(elm.find('.pit-grid-row.pit-grid-row-hover').length).toBe(0);
 
       scope.$apply(function(){
-        scope.data[1].pitGridRowHover = true;
-        scope.getClassNames(scope.data[1]);
+        scope.data[1].pitGridClassNames["pit-grid-row-hover"] = true;
       })
 
       expect(elm.find('.pit-grid-row:eq(1)')).toHaveClass('pit-grid-row-hover');
 
       scope.$apply(function(){
-        scope.data[1].pitGridRowHover = false;
-        scope.getClassNames(scope.data[1]);
+        scope.data[1].pitGridClassNames["pit-grid-row-hover"] = false;
       })
 
       expect(elm.find('.pit-grid-row:eq(1)')).not.toHaveClass('pit-grid-row-hover');
@@ -389,7 +387,7 @@ describe("grid DOM", function() {
     });
   });
 
-  describe("row hiding", function() {
+  describe("column hiding", function() {
     it("shows an arrow on hidable columns", function() {
       createDirectiveDom({'pit-grid-enable-column-toggle': ''});
 

@@ -14,16 +14,16 @@
     "grunt-cssc": "*",
     "grunt-htmlhint": "*",
     "matchdep": "*",
-    "karma-script-launcher": "~0.1.0",
-    "karma-chrome-launcher": "~0.1.0",
-    "karma-firefox-launcher": "~0.1.0",
-    "karma-html2js-preprocessor": "~0.1.0",
-    "karma-jasmine": "~0.1.3",
-    "karma-requirejs": "~0.1.0",
-    "karma-coffee-preprocessor": "~0.1.0",
-    "karma-phantomjs-launcher": "~0.1.0",
-    "karma": "~0.10.2",
-    "karma-coverage": "~0.1.0",
-    "grunt-karma": "~0.6.2"
+    "karma-script-launcher": "*",
+    "karma-chrome-launcher": "*",
+    "karma-firefox-launcher": "*",
+    "karma-html2js-preprocessor": "*",
+    "karma-jasmine": "*",
+    "karma-requirejs": "*",
+    "karma-coffee-preprocessor": "*",
+    "karma-phantomjs-launcher": "*",
+    "karma": "*",
+    "karma-coverage": "*",
+    "grunt-karma": "*"
   }
 }

@@ -41,6 +41,11 @@ module.exports = function(grunt){
 
     uglify: {
       build: {
+        options:{
+          sourceMap: 'build/source.min.map',
+          sourceMappingURL: 'source.min.map',
+          sourceMapRoot: '/pit-grid/'
+        },
         files: {
           'build/pit-lib.min.js': [
              'lib/pitControls/*.js'

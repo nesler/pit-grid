@@ -23,7 +23,7 @@ app.controller('MainCtrl', function($scope, $http, $timeout) {
       });
     }, 500);  
 
-  $scope.$watch('rows.length', function(newVal){
+  $scope.$watch('rows', function(newVal){
     $scope.visibleRows = $scope.rows.filter(function(row){
       return row.HIDDEN_ROW !== 'true' && row.DISHINDEX !== '---';
     });
