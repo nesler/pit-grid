@@ -7,7 +7,7 @@ module.exports = function(grunt){
 
     watch: {    
       js: {
-        files: ['lib/**/*.js'],
+        files: ['src/**/*.js'],
         tasks: ['uglify']
       },
       html: {
@@ -16,7 +16,7 @@ module.exports = function(grunt){
       },
       //run unit tests with karma (server needs to be already running)
       karma: {
-        files: ['lib/**/*.js', 'tests/**/*.js'],//['app/js/**/*.js', 'test/browser/**/*.js'],
+        files: ['src/**/*.js', 'tests/**/*.js'],//['app/js/**/*.js', 'test/browser/**/*.js'],
         exclude: ['tests/*.conf.js'],
         tasks: ['karma:unit:run'] //NOTE the :run flag
       }
@@ -48,9 +48,9 @@ module.exports = function(grunt){
         },
         files: {
           'build/pit-lib.min.js': [
-             'lib/pitControls/*.js'
-            ,'lib/pitControls/services/*.js'
-            ,'lib/pitControls/directives/*.js'
+             'src/pitControls/*.js'
+            ,'src/pitControls/services/*.js'
+            ,'src/pitControls/directives/*.js'
           ]
         }
       }

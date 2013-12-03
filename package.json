@@ -22,7 +22,7 @@
     "karma-requirejs": "*",
     "karma-coffee-preprocessor": "*",
     "karma-phantomjs-launcher": "*",
-    "karma": "*",
+    "karma": "~0.11",
     "karma-coverage": "*",
     "grunt-karma": "*"
   }

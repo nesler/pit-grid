@@ -2,72 +2,72 @@
 <html ng-app="gridtest">
 
   <head>
-    <meta charset="utf-8" />
-    <meta http-equiv="X-UA-Compatible" content="IE=8" >
-    <title>AngularJS gridtest</title>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=8" >
+  <title>AngularJS gridtest</title>
 
-    <link type="text/css"  rel="stylesheet" href="css/bootstrap.css" />
-    <link type="text/css"  rel="stylesheet" href="css/style.css" />
+  <link type="text/css"  rel="stylesheet" href="css/bootstrap.css" />
+  <link type="text/css"  rel="stylesheet" href="css/style.css" />
 
   </head>
 
   <body ng-controller="MainCtrl">
-    <p>Enmeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeegetlangtekst</p>
+  <p>Enmeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeegetlangtekst</p>
+  <div class="container">
     <button class="btn" ng-click="scopeEditable = !scopeEditable">Can edit: {{scopeEditable ? 'yes' : 'no'}}</button>
-    <div class="container">
-      <div
-        pit-grid
-        pit-grid-data-source="visibleRows"
-        pit-grid-template="table.html"
-        pit-grid-config="config.json"
-        pit-grid-editable="scopeEditable"
-        pit-grid-page-size="8"
-        pit-grid-height="500px"
-        pit-grid-fixed-header
-        pit-grid-enable-fixed-columns
-        pit-grid-row-select
-        pit-grid-render-mode="chunk"
-        pit-grid-loading-propery="loading"
-        pit-grid-row-hover-highlight
-        pit-grid-sortable="barcode,realIndex"
-        pit-grid-enable-column-toggle
-        pit-grid-row-grouping="Barcode"
-        >
-      </div>
+    <div
+    pit-grid
+    pit-grid-data-source="visibleRows"
+    pit-grid-template="table.html"
+    pit-grid-config="config.json"
+    pit-grid-editable="scopeEditable"
+    pit-grid-page-size="8"
+    pit-grid-height="500px"
+    pit-grid-fixed-header
+    pit-grid-enable-fixed-columns
+    pit-grid-row-select
+    pit-grid-render-mode="chunk"
+    pit-grid-loading-propery="loading"
+    pit-grid-row-hover-highlight
+    pit-grid-sortable="barcode,realIndex"
+    pit-grid-enable-column-toggle
+    pit-grid-row-grouping="Barcode"
+    >
     </div>
-    <p>Mange korte tekster</p>
-    <p>Mange korte tekster</p>
-    <p>Mange korte tekster</p>
-    <p>Mange korte tekster</p>
-    <p>Mange korte tekster</p>
-    <p>Mange korte tekster</p>
-    <p>Mange korte tekster</p>
-    <p>Mange korte tekster</p>
-    <p>Mange korte tekster</p>
-    <p>Mange korte tekster</p>
-    <p>Mange korte tekster</p>
-    <p>Mange korte tekster</p>
-    <p>Mange korte tekster</p>
-    <p>Mange korte tekster</p>
-    <p>Mange korte tekster</p>
-    <p>Mange korte tekster</p>
-    <p>Mange korte tekster</p>
-    <p>Mange korte tekster</p>
-    <p>Mange korte tekster</p>
-    <p>Mange korte tekster</p>
-    <p>Mange korte tekster</p>
-    <p>Mange korte tekster</p>
-    <p>Mange korte tekster</p>
-    <p>Mange korte tekster</p>
-    <p>Mange korte tekster</p>
-    <p>Mange korte tekster</p>
-    <p>Mange korte tekster</p>
-    <p>Mange korte tekster</p>
-    <script type="text/javascript" src="http://code.jquery.com/jquery-1.10.2.min.js"></script>
-    <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.1/angular.min.js"></script>
-    <script type="text/javascript" src="js/bootstrap.js"></script>
-    <script type="text/javascript" src="../build/pit-lib.min.js"></script>
-    <script type="text/javascript" src="js/app.js"></script>
+  </div>
+  <p>Mange korte tekster</p>
+  <p>Mange korte tekster</p>
+  <p>Mange korte tekster</p>
+  <p>Mange korte tekster</p>
+  <p>Mange korte tekster</p>
+  <p>Mange korte tekster</p>
+  <p>Mange korte tekster</p>
+  <p>Mange korte tekster</p>
+  <p>Mange korte tekster</p>
+  <p>Mange korte tekster</p>
+  <p>Mange korte tekster</p>
+  <p>Mange korte tekster</p>
+  <p>Mange korte tekster</p>
+  <p>Mange korte tekster</p>
+  <p>Mange korte tekster</p>
+  <p>Mange korte tekster</p>
+  <p>Mange korte tekster</p>
+  <p>Mange korte tekster</p>
+  <p>Mange korte tekster</p>
+  <p>Mange korte tekster</p>
+  <p>Mange korte tekster</p>
+  <p>Mange korte tekster</p>
+  <p>Mange korte tekster</p>
+  <p>Mange korte tekster</p>
+  <p>Mange korte tekster</p>
+  <p>Mange korte tekster</p>
+  <p>Mange korte tekster</p>
+  <p>Mange korte tekster</p>
+  <script type="text/javascript" src="http://code.jquery.com/jquery-1.10.2.min.js"></script>
+  <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.1/angular.min.js"></script>
+  <script type="text/javascript" src="js/bootstrap.js"></script>
+  <script type="text/javascript" src="../build/pit-lib.min.js"></script>
+  <script type="text/javascript" src="js/app.js"></script>
   </body>
 
 </html>

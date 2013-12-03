@@ -18,11 +18,11 @@ module.exports = function(config) {
       'https://ajax.googleapis.com/ajax/libs/angularjs/1.2.1/angular.min.js',
       'angular-mocks.js',
       'helpers.js',
-      '../lib/pitControls/utils.js',
-      '../lib/pitControls/namespaces.js',
-      '../lib/pitControls/**.js',
-      '../lib/pitControls/services/*.js',
-      '../lib/pitControls/directives/**.js',
+      '../src/pitControls/utils.js',
+      '../src/pitControls/namespaces.js',
+      '../src/pitControls/**.js',
+      '../src/pitControls/services/*.js',
+      '../src/pitControls/directives/**.js',
       './**/**.spec.js'
     ],
 
@@ -46,7 +46,7 @@ module.exports = function(config) {
       // source files, that you wanna generate coverage for
       // do not include tests or libraries
       // (these files will be instrumented by Istanbul)
-      '../lib/pitControls/**/*.js': ['coverage']
+      '../src/pitControls/**/*.js': ['coverage']
     },
 
     // web server port
