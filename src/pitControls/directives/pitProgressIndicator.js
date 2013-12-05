@@ -1,5 +1,17 @@
 'use strict'
 
+/**
+ * @ngdoc directive
+ * @name pitControls.directive:pit-progress-indicator
+ * @element     any
+ * @restrict    AC
+ * @description
+ * Create a progress bar
+ * 
+ * @param {expression} pit-progress-indicator The current value of the progress
+ * @param {number} [pit-progress-indicator-min-value=0] Min-value of the progress bar. Default: 0. Optional.
+ * @param {number} [pit-progress-indicator-max-value=100] Max-value of the progress bar. Default: 100. Optional.
+ */
 var PitGridProgressIndicatorController = function($scope, $element, $attrs){
   $scope.minValue = angular.isDefined($attrs.pitProgressIndicatorMinValue) ? $attrs.pitProgressIndicatorMinValue : 0;
   $scope.maxValue = angular.isDefined($attrs.pitProgressIndicatorMaxValue) ? $attrs.pitProgressIndicatorMaxValue : 100;

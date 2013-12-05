@@ -1,4 +1,30 @@
-//We're not able to use the "number" filter on inputs, so we'll just create a directive in stead
+/**
+ * @ngdoc directive
+ * @name pitControls.directive:pit-only-numbers
+ * @element     input
+ * @restrict    AC
+ * @description
+ * Force an input to allow only numbers. The "number" filter won't allow this.
+ * This works both with and without ng-model present,so it could be used for simple input limitation
+ * <pre>
+ *   <input type="text" pit-only-numbers/>
+ * </pre>
+ * or
+ * <pre>
+ *   <input type="text" ng-model="value" pit-grid-only-numbers/>
+ * </pre>
+ * @example
+ * Prep for a working build of grunt-ngdocs with Angular 1.2.x
+ * <pre>
+ *   <example module="pitControls">
+ *     <file name="index.html">
+ *       Type anything, only numeric values will persist
+ *       <input type="text" pit-only-numbers/>
+ *     </file>
+ *   </example>
+ * </pre>
+ */
+
 pitDirectives.directive('pitOnlyNumbers', function(){
   return {
     restrict: 'AC',
@@ -8,13 +34,14 @@ pitDirectives.directive('pitOnlyNumbers', function(){
         el.addClass('pit-only-numbers-invalid-element-type invalid-element-type');
         return;
       }
+
       //Matches: 1,23 - 0,12 - ,21
       var  r = /^(\d*),(\d*)$/
           ,prop = attr.ngModel
           ,ref = $scope
-          ,paths = prop.split('.');
-      $scope.$watch(prop, function(newVal, oldVal){
-        var val = newVal;
+          ,paths = !!prop ? prop.split('.') : [];
+
+      function fixInput(val){
         //Only act if the input is xx,yy and not xx.yy
         if(r.test(val)){
           val = val.replace(r, '$1.$2');
@@ -29,21 +56,37 @@ pitDirectives.directive('pitOnlyNumbers', function(){
           val = val.join('');
         }
 
-        if(val && angular.isString(val) && val.indexOf('.') == 0)
-          val = '0' + val;
-        
-        if(val != newVal){
-          ref = $scope;
+        return val;
+      }
+
+      // If ng-model was provided
+      if(prop && paths.length > 0){
+        $scope.$watch(prop, function(newVal, oldVal){
+          var val = fixInput(newVal);        
+          if(val && angular.isString(val) && val.indexOf('.') == 0)
+            val = '0' + val;
           
-          for(var i = 0; i < paths.length-1; ++i)
-            ref = ref[paths[i]];
+          if(val != newVal){
+            ref = $scope;
             
-          if(val == (val*1).toString())
-            val = val*1;
-  
-          ref[paths[paths.length-1]] = val;
-        }
-      });
+            for(var i = 0; i < paths.length-1; ++i)
+              ref = ref[paths[i]];
+              
+            if(val == (val*1).toString())
+              val = val*1;
+    
+            ref[paths[paths.length-1]] = val;
+          }
+        });
+      // Else be stupid :D
+      }else{
+        el.bind('keyup', function(){
+          var preVal = el.val();
+          var postVal = fixInput(preVal);
+          if(preVal != postVal)
+            el.val(postVal);
+        })
+      }
     }
   }
 });

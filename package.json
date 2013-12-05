@@ -11,8 +11,12 @@
     "grunt-contrib-cssmin": "*",
     "grunt-contrib-uglify": "*",
     "grunt-contrib-watch": "*",
+    "grunt-contrib-clean": "*",
     "grunt-cssc": "*",
     "grunt-htmlhint": "*",
+    "grunt-ngdocs": "*",
+    "grunt-karma": "*",
+
     "matchdep": "*",
     "karma-script-launcher": "*",
     "karma-chrome-launcher": "*",
@@ -23,7 +27,6 @@
     "karma-coffee-preprocessor": "*",
     "karma-phantomjs-launcher": "*",
     "karma": "~0.11",
-    "karma-coverage": "*",
-    "grunt-karma": "*"
+    "karma-coverage": "*"
   }
 }

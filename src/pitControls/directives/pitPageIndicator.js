@@ -1,3 +1,19 @@
+/**
+ * @ngdoc directive
+ * @name pitControls.directive:pit-page-indicator
+ * @element     any
+ * @restrict    AC
+ * @description
+ * Add a page-indicator to your page. Useful for tables or other paged stuffs
+ * @scope
+ * @param {expression} pit-page-indicator The number of pages to render
+ * @param {function} [pit-page-indicator-click] The function to eval when navigating
+ *                                              It will have [index] passed as parameter.
+ *                                              Optional.
+ * @param {expression} [pit-page-indicator-selected-page] Either the actual value of the selected page,
+ *                                                        or a reference to an object containing the value.
+ *                                                        Optional.
+ */
 var PageIndicatorController = function($scope, $element, $attrs, $log){
 
   $scope.pages = [];

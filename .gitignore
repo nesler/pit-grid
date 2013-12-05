@@ -219,3 +219,4 @@ pip-log.txt
 *.js.html
 *.html
 !example/*.html
+**/docs/**

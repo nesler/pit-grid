@@ -1,3 +1,11 @@
+/**
+ * @ngdoc directive
+ * @name pitControls.directive:pit-trim-leading-zeros
+ * @element any
+ * @restrict AC
+ * @description
+ * Trim leading zeros from any text-source
+ */
 pitDirectives.directive('pitTrimLeadingZeros', function(){
   return {
     restrict: 'AC', // E = Element, A = Attribute, C = Class, M = Comment

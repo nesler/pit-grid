@@ -8,7 +8,7 @@ module.exports = function(grunt){
     watch: {    
       js: {
         files: ['src/**/*.js'],
-        tasks: ['uglify']
+        tasks: ['uglify', 'ngdocs']
       },
       html: {
         files: ['example/index.html'],
@@ -61,9 +61,23 @@ module.exports = function(grunt){
         configFile: 'tests/run.conf.js',
         background: true
       }
-    }
+    },
+
+    ngdocs: {
+      options: {
+        scripts: ['https://ajax.googleapis.com/ajax/libs/angularjs/1.2.3/angular.js','../build/pit-lib.min.js'],
+        title: 'PitControls',
+        html5Mode: false
+      },
+      api: {
+        src: ['src/pitControls/*.js', 'src/pitControls/directives/*.js', 'src/pitControls/services/*.js'],
+        title: 'Docs'
+      }
+    },
+
+    clean: ['docs']
   });
 
-  grunt.registerTask('default', []);
+  grunt.registerTask('default', ['uglify', 'clean', 'ngdocs']);
 
 };

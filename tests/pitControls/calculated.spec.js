@@ -3,7 +3,7 @@ describe("calculated DOM", function() {
 
   function createDirectiveDom(formula, decimals){
     elm = angular.element(
-      '<div pit-calculated ng-model="value" pit-calculated-formula="'+formula+'" pit-calculated-decimals="'+decimals+'"/>'
+      '<div pit-calculated ng-model="value" pit-calculated-formula="'+formula+'" '+ (decimals ? 'pit-calculated-decimals="'+decimals+'"' : '' ) + '/>'
     );
 
     compile(elm)(scope);
@@ -66,4 +66,20 @@ describe("calculated DOM", function() {
     expect($log.error.logs.length).toBe(1);
     expect($log.error.logs[0][0]).toBe('b is not defined anywhere');
   }));
+
+  it("should calculate without decimal specification", function() {
+    scope.$apply(function(){
+      scope.a = 0;
+      scope.b = 0;
+    });
+
+    createDirectiveDom('a+b');
+
+    scope.$apply(function(){
+      scope.a = 2;
+      scope.b = 5;
+    });
+
+    expect(elm.text()).toBe('7');
+  });
 });

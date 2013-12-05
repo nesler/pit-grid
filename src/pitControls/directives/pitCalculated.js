@@ -1,4 +1,15 @@
-// A directive, that accepts a formula-attribute, and watches the formula-properties for changes to live-update the result
+/**
+ * @ngdoc directive
+ * @name pitControls.directive:pit-calculated
+ * @element     input
+ * @restrict    A
+ * @required ng-model
+ * @description
+ * A directive, that accepts a formula-attribute, and watches the formula-properties for changes to live-update the result
+ *
+ * @param {expression} pit-calculated-formula A reference to the formula to use, or a string with the formula
+ * @param {expression} [pit-calculated-decimals] A reference to the number of decimals for the result. Optional.
+ */
 pitDirectives.directive('pitCalculated', ['$log',function($log){
   return{
     restrict: 'AC',
@@ -18,7 +29,7 @@ pitDirectives.directive('pitCalculated', ['$log',function($log){
       // Otherwise, it was a scope property, which contained the formula
       formula = angular.isNumber(formula) || angular.isUndefined(formula) ? attr.pitCalculatedFormula : formula;
       decimals = angular.isNumber(decimals) ? attr.pitCalculatedDecimals : decimals;
-      
+
       var toWatch = formula.match(/([A-Za-z]+)/g);
 
       for(var i = toWatch.length; i--;){
