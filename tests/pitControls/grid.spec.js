@@ -261,26 +261,6 @@ describe("grid DOM", function() {
     }));
   });
 
-  describe("row-hover", function() {
-    it("colors the row when hovered", function() {
-      createDirectiveDom({'pit-grid-row-hover-highlight': ''});
-
-      expect(elm.find('.pit-grid-row.pit-grid-row-hover').length).toBe(0);
-
-      scope.$apply(function(){
-        scope.data[1].pitGridClassNames["pit-grid-row-hover"] = true;
-      })
-
-      expect(elm.find('.pit-grid-row:eq(1)')).toHaveClass('pit-grid-row-hover');
-
-      scope.$apply(function(){
-        scope.data[1].pitGridClassNames["pit-grid-row-hover"] = false;
-      })
-
-      expect(elm.find('.pit-grid-row:eq(1)')).not.toHaveClass('pit-grid-row-hover');
-    });
-  });
-
   describe("row-select", function() {
     it("enables row-select on row click", function() {
       createDirectiveDom({'pit-grid-row-select': ''});
@@ -397,18 +377,18 @@ describe("grid DOM", function() {
     it("toggles the column when clicking the arrow", function() {
       createDirectiveDom({'pit-grid-enable-column-toggle': ''});
 
-      expect(elm.find('th[ng-hide="column1visible"]').hasClass('ng-hide')).toBe(true);
-      expect(elm.find('th[ng-show="column1visible"]').hasClass('ng-hide')).toBe(false);
+      expect(elm.find('th[ng-hide="column0visible"]').hasClass('ng-hide')).toBe(true);
+      expect(elm.find('th[ng-show="column0visible"]').hasClass('ng-hide')).toBe(false);
 
       elm.find('.pit-grid-collapse-column').click();
 
-      expect(elm.find('th[ng-hide="column1visible"]').hasClass('ng-hide')).toBe(false);
-      expect(elm.find('th[ng-show="column1visible"]').hasClass('ng-hide')).toBe(true);
+      expect(elm.find('th[ng-hide="column0visible"]').hasClass('ng-hide')).toBe(false);
+      expect(elm.find('th[ng-show="column0visible"]').hasClass('ng-hide')).toBe(true);
 
       elm.find('.pit-grid-expand-column').click();
 
-      expect(elm.find('th[ng-hide="column1visible"]').hasClass('ng-hide')).toBe(true);
-      expect(elm.find('th[ng-show="column1visible"]').hasClass('ng-hide')).toBe(false);
+      expect(elm.find('th[ng-hide="column0visible"]').hasClass('ng-hide')).toBe(true);
+      expect(elm.find('th[ng-show="column0visible"]').hasClass('ng-hide')).toBe(false);
     });
   });
 });

@@ -26,9 +26,10 @@
     pit-grid-fixed-header
     pit-grid-enable-fixed-columns
     pit-grid-row-select
-    pit-grid-render-mode="chunk"
-    pit-grid-loading-propery="loading"
-    pit-grid-row-hover-highlight
+    pit-grid-render-mode="virtual"
+    pit-grid-loading-property="loading"
+    pit-grid-loading-template="loaderTemplate"
+    
     pit-grid-sortable="barcode,realIndex"
     pit-grid-enable-column-toggle
     pit-grid-row-grouping="Barcode"
@@ -66,7 +67,17 @@
   <script type="text/javascript" src="http://code.jquery.com/jquery-1.10.2.min.js"></script>
   <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.3/angular.min.js"></script>
   <script type="text/javascript" src="js/bootstrap.js"></script>
-  <script type="text/javascript" src="../build/pit-lib.min.js"></script>
+  <!--script type="text/javascript" src="../build/pit-lib.min.js"></script-->
+  <script type="text/javascript" src="../src/pitControls/namespaces.js"></script>
+  <script type="text/javascript" src="../src/pitControls/utils.js"></script>
+  <script type="text/javascript" src="../src/pitControls/services/utilities.js"></script>
+  <script type="text/javascript" src="../src/pitControls/directives/pitCalculated.js"></script>
+  <script type="text/javascript" src="../src/pitControls/directives/pitGrid.js"></script>
+  <script type="text/javascript" src="../src/pitControls/directives/pitOnlyNumbers.js"></script>
+  <script type="text/javascript" src="../src/pitControls/directives/pitOverlay.js"></script>
+  <script type="text/javascript" src="../src/pitControls/directives/pitPageIndicator.js"></script>
+  <script type="text/javascript" src="../src/pitControls/directives/pitProgressIndicator.js"></script>
+  <script type="text/javascript" src="../src/pitControls/directives/pitTrimLeadingZeros.js"></script>
   <script type="text/javascript" src="js/app.js"></script>
   </body>
 

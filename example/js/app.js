@@ -1,17 +1,15 @@
 var app = angular.module('gridtest', ['pitControls']);
 
 app.controller('MainCtrl', function($scope, $http, $timeout) {
-  $scope.name = 'World 1 æøå';
-
   $scope.rows = [];
   $scope.visibleRows = [];
   $scope.loading = true;
-  $scope.scope_progress = 20;
+
+  $scope.loaderTemplate = '<h1>plx w41t ..!.. </h3>';
 
   $timeout(function(){
     $http.get('data.json')
       .success(function(data){
-        //$scope.rows = data.Rowsets.Rowset[0].Row;
         var rows = data.Rowsets.Rowset[0].Row;
         var tmp = [];
         for(var i = 0; i < rows.length; ++i){
@@ -21,15 +19,13 @@ app.controller('MainCtrl', function($scope, $http, $timeout) {
         $scope.rows = tmp;
         $scope.loading = false;
       });
-    }, 500);  
+    }, 5);  
 
   $scope.$watch('rows', function(newVal){
     $scope.visibleRows = $scope.rows.filter(function(row){
       return row.HIDDEN_ROW !== 'true' && row.DISHINDEX !== '---';
     });
   });
-
-  $scope.testCfg = {'abe': 1}
 });
 
 app.controller('TableCtrl', function($scope, $http, $timeout){
@@ -37,6 +33,14 @@ app.controller('TableCtrl', function($scope, $http, $timeout){
     return row.HIDDEN_ROW !== 'true' && row.DISHINDEX !== '---';
   }
 });
+
+app.controller('RowCtrl', function($scope){
+  $scope.$watch('visibleRows[realIndex].FIANITRIT', function(newVal, oldVal){
+    console.log($scope.realIndex)
+    if(newVal != oldVal)
+      console.log(newVal, oldVal);
+  });
+})
 
 app.directive('sapResult', function(){
   return {

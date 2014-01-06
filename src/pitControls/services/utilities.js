@@ -106,7 +106,7 @@ var sortBy = (function() {
     };
 
   // actual implementation
-  return sort_by = function() {
+  return function() {
     var fields = [],
         n_fields = arguments.length,
         field, name, reverse, cmp;

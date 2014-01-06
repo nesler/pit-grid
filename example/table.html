@@ -18,7 +18,7 @@
     </tr>
   </thead>
   <tbody>
-    <tr><!--   ng-repeat="row in rows | filter:isRowHidden"> -->
+    <tr ng-controller="RowCtrl"><!--   ng-repeat="row in rows | filter:isRowHidden"> -->
       <td><input type="checkbox" ng-checked="selected" ng-click="selected = !selected"/></td>
       <td pit-trim-leading-zeros>{{Barcode}}</td>
       <td pit-trim-leading-zeros>{{INSPLOT}}</td>
@@ -26,7 +26,7 @@
       <td>{{realIndex}}</td>
       <td>{{MSTR_CHAR}}</td>
       <td>{{SAMPLEID}}</td>
-      <td><input type="text" ng-model="FIANITRAT" pit-only-numbers/></td>
+      <td><input type="text" ng-model="FIANITRAT" pit-only-numbers min="-10"/></td>
       <td><input type="text" ng-model="FIANITRIT" pit-only-numbers/></td>
       <td><input type="text" ng-model="WEIGHT" pit-only-numbers/></td>
       <td ng-model="9NITRAT" pit-calculated pit-calculated-formula="pitGridConfig.CALCULATIONS.9NITRAT" pit-calculated-decimals="2" sap-result>{{9NITRAT}}</td>
