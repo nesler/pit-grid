@@ -14,6 +14,7 @@
 *   pit-grid-enable-column-toggle   (o)   enable toggling column visibility
 *   pit-grid-row-select             (o)   enabled selecting a row by clicking it. optionally do this externally by setting scope.rows[i].pitGridRowSelected = true.
 *   pit-grid-row-grouping           (o)   enables grouping rows by cell values. default grouping is 'odd'
+*   pit-grid-row-hover-highlight
 **/
 'use strict'
 
@@ -764,6 +765,11 @@ pitDirectives.directive('pitGrid', ['$http','$compile','$log','utilities',functi
              'ng-repeat': 'row in renderedRows'
             ,'ng-class': 'row.pitGridClassNames'
           };
+
+          if(angular.isDefined(attrs.pitGridRowHoverHighlight)){
+            rowAttrs['ng-mouseenter'] = 'row.pitGridClassNames["pit-grid-row-hover"] = true;';
+            rowAttrs['ng-mouseleave'] = 'row.pitGridClassNames["pit-grid-row-hover"] = false;';
+          }
 
           if(angular.isDefined(attrs.pitGridRowColorOdds) || (angular.isDefined(attrs.pitGridRowGrouping) && attrs.pitGridRowGrouping === 'odd')){
             rowAttrs['ng-class-odd'] = "'pit-grid-odd-row'";
