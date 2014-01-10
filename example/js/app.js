@@ -35,9 +35,8 @@ app.controller('TableCtrl', function($scope, $http, $timeout){
 });
 
 app.controller('RowCtrl', function($scope){
-  $scope.$watch('visibleRows[realIndex].FIANITRIT', function(newVal, oldVal){
-    console.log($scope.realIndex)
-    if(newVal != oldVal)
+  $scope.$watch('$parent.row.FIANITRIT', function(newVal, oldVal){
+    if(String(newVal).length != String(oldVal).length)
       console.log(newVal, oldVal);
   });
 })
