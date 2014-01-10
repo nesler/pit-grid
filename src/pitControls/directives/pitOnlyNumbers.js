@@ -14,18 +14,23 @@
  *   <input type="text" ng-model="value" pit-only-numbers/>
  * </pre>
  * <b>Note:</b> This will NOT work with `type="number"`! 
- * @example
- * Prep for a working build of grunt-ngdocs with Angular 1.2.x
- * <pre>
- *   <example module="pitControls">
- *     <file name="index.html">
- *       Type anything, only numeric values will persist
- *       <input type="text" ng-model="value" pit-only-numbers/>
- *     </file>
- *   </example>
- * </pre>
+ * 
  * @param {Number} [pit-only-numbers-min] Min-value for the input
  * @param {Number} [pit-only-numbers-max] Max-value for the input
+ * 
+ * @example Some basic example
+    <example>
+      <file name="index.html">
+        <p>Type anything, only numeric values will persist</p>
+        <input type="text" ng-init="value=1" ng-model="value" pit-only-numbers=""/>
+        <p>{{value}}</p>
+      </file>
+      <file name="style.css">
+        .someClass {
+          color:red;
+        }
+      </file>
+    </example>
  */
 
 pitDirectives.directive('pitOnlyNumbers', function(){
