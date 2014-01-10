@@ -15,7 +15,7 @@ module.exports = function(config) {
     // list of files / patterns to load in the browser
     files: [
       'http://code.jquery.com/jquery-1.10.2.min.js',
-      'https://ajax.googleapis.com/ajax/libs/angularjs/1.2.1/angular.min.js',
+      'https://ajax.googleapis.com/ajax/libs/angularjs/1.2.7/angular.min.js',
       'angular-mocks.js',
       'helpers.js',
       '../src/pitControls/utils.js',
@@ -35,19 +35,19 @@ module.exports = function(config) {
 
     // test results reporter to use
     // possible values: 'dots', 'progress', 'junit', 'growl', 'coverage'
-    reporters: ['progress', 'coverage'],
+    reporters: ['progress'],//, 'coverage'],
 
-    coverageReporter: {
-      type : 'html',
-      dir : 'coverage/'
-    },
+    // coverageReporter: {
+    //   type : 'html',
+    //   dir : 'coverage/'
+    // },
 
-    preprocessors: {
-      // source files, that you wanna generate coverage for
-      // do not include tests or libraries
-      // (these files will be instrumented by Istanbul)
-      '../src/pitControls/**/*.js': ['coverage']
-    },
+    // preprocessors: {
+    //   // source files, that you wanna generate coverage for
+    //   // do not include tests or libraries
+    //   // (these files will be instrumented by Istanbul)
+    //   '../src/pitControls/**/*.js': ['coverage']
+    // },
 
     // web server port
     port: 9876,
