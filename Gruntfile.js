@@ -8,7 +8,7 @@ module.exports = function(grunt){
     watch: {    
       js: {
         files: ['src/**/*.js'],
-        tasks: ['uglify', 'ngdocs']
+        tasks: ['default']
       },
       html: {
         files: ['example/index.html'],
@@ -17,7 +17,7 @@ module.exports = function(grunt){
       //run unit tests with karma (server needs to be already running)
       karma: {
         files: ['src/**/*.js', 'tests/**/*.js'],//['app/js/**/*.js', 'test/browser/**/*.js'],
-        exclude: ['tests/*.conf.js'],
+        exclude: ['tests/*.conf.js', 'tests/coverage/**/*.js*'],
         tasks: ['karma:unit:run'] //NOTE the :run flag
       }
     },
@@ -65,7 +65,7 @@ module.exports = function(grunt){
 
     ngdocs: {
       options: {
-        scripts: ['https://ajax.googleapis.com/ajax/libs/angularjs/1.2.3/angular.js','../build/pit-lib.min.js'],
+        scripts: ['https://ajax.googleapis.com/ajax/libs/angularjs/1.2.7/angular.js','../build/pit-lib.min.js'],
         title: 'PitControls',
         html5Mode: false
       },
@@ -75,7 +75,7 @@ module.exports = function(grunt){
       }
     },
 
-    clean: ['docs']
+    clean: ['docs', 'tests/coverage']
   });
 
   grunt.registerTask('default', ['uglify', 'clean', 'ngdocs']);
