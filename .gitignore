@@ -220,3 +220,4 @@ pip-log.txt
 *.html
 !example/*.html
 **/docs/**
+**/bower_components/**
