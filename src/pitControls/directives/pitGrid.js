@@ -56,7 +56,7 @@ pitDirectives.directive('pitGrid', ['$http','$compile','$log','utilities',functi
           break;
         default:
           // Just in case the parent controller should manage this.
-          $scope.$watch($attrs.pitGridEditable, function(newVal){
+          $scope.$watch('extEditable', function(newVal){
             $scope.editable = !!newVal;
           });
       }
@@ -86,9 +86,22 @@ pitDirectives.directive('pitGrid', ['$http','$compile','$log','utilities',functi
           }
 
           if(isMatch){
-            classNames['pit-grid-odd-row'] = prevRow.pitGridClassNames['pit-grid-odd-row']
+            classNames['pit-grid-odd-row'] = prevRow.pitGridClassNames['pit-grid-odd-row'];
           }else{
-            classNames['pit-grid-odd-row'] = !prevRow.pitGridClassNames['pit-grid-odd-row']
+            classNames['pit-grid-odd-row'] = !prevRow.pitGridClassNames['pit-grid-odd-row'];
+          }
+
+          row.groupspanhide = isMatch;
+          var isLast;
+          if(!isMatch || (isLast = index == $scope.renderedRows.length-1)){
+            var cnt = 0;
+            while(++cnt){
+              var pr = $scope.renderedRows[index - cnt];
+              if(!pr.groupspanhide){
+                pr.rowspan = cnt + (isLast ? 1 : 0);
+                break;
+              }
+            }
           }
         }
       }
@@ -316,7 +329,7 @@ pitDirectives.directive('pitGrid', ['$http','$compile','$log','utilities',functi
     $scope.pageSize = angular.isDefined($attrs.pitGridPageSize) ? $attrs.pitGridPageSize*1 : 0;
     function renderPaged(page){
       $scope.currentPage = (angular.isNumber(page) ? page : $scope.currentPage) || 0;
-      $scope.totalPages = Math.ceil($scope.dataSourceRows.length/$scope.pageSize);
+      $scope.totalPages = $scope.extTotalPages = Math.ceil($scope.dataSourceRows.length/$scope.pageSize);
       var tmp = [];
       for(var i = $attrs.pitGridPageSize * $scope.currentPage; i < $attrs.pitGridPageSize * ($scope.currentPage+1); ++i){
         var row = $scope.dataSourceRows[i];
@@ -509,7 +522,7 @@ pitDirectives.directive('pitGrid', ['$http','$compile','$log','utilities',functi
 
     function rowWatchHandler(newVal){
       if(!newVal)
-        newVal = $scope.$eval($attrs.pitGridDataSource);
+        newVal = $scope.dataSource;//$eval($attrs.pitGridDataSource);
 
       if(!newVal || newVal.length == 0)
         return;
@@ -529,12 +542,15 @@ pitDirectives.directive('pitGrid', ['$http','$compile','$log','utilities',functi
     // Dont start watching properties until the DOM is actually linked and ready for data!
     $scope.$on('pitGridDomLinked', function(){
       // Watch both length and actual object, since removal triggers on length
-      $scope.$watch($attrs.pitGridDataSource + '.length', function(newVal, oldVal){
+      $scope.$watch('dataSource.length', function(newVal, oldVal){
         rowWatchHandler();
       });
-      // $scope.$watch($attrs.pitGridDataSource, function(newVal){
-      //   rowWatchHandler(newVal);
-      // });
+      $scope.$watch('dataSource', function(newVal, oldVal){
+        rowWatchHandler(newVal);
+      });
+      $scope.$watch('extSelectedPage', function(){
+        rowWatchHandler();
+      })
     });
     
   }
@@ -593,8 +609,6 @@ pitDirectives.directive('pitGrid', ['$http','$compile','$log','utilities',functi
 
     htmlTemplate.find('.mainTable').wrap('<div style="overflow: scroll; height:'+$scope.gridHeight + '' + $scope.gridHeightUnit + ';"/>');
     htmlTemplate.find('.fixedColumnTable').wrap('<div style="overflow: hidden; float:left; height:'+$scope.gridHeight + '' + $scope.gridHeightUnit + ';"/>');
-
-    htmlTemplate.find('tbody tr').css('height', $scope.rowHeight + 'px');
     
     fixedColumnTable.css('border-right', 'none');
     mainTable.css('border-left', 'none');
@@ -660,11 +674,20 @@ pitDirectives.directive('pitGrid', ['$http','$compile','$log','utilities',functi
   return {
     restrict: 'A',
     controller: ['$scope','$element','$attrs','$q','$http','$log','$timeout','$compile','utilities',PitGridController],
+    scope: {
+      template: "=pitGridTemplate",
+      dataSource: "=pitGridDataSource",
+      isLoading: "=?pitGridLoadingProperty",
+      loadingTemplate: "=?pitGridLoadingTemplate",
+      extEditable: "=?pitGridEditable",
+      extSelectedPage: "=?pitGridCurrentPage",
+      extTotalPages: "=?pitGridTotalPages"
+    },
     link: function($scope, el, attrs){
       function processTemplate(htmlTemplate){
         //Add a row. prefix to all assumed variables in the template
         htmlTemplate = htmlTemplate.replace(/{{(\w+)}}/g, '{{row.$1}}');
-        var ngDirectives = htmlTemplate.match(/ng-\w+=".+?"/g);
+        var ngDirectives = htmlTemplate.match(/<td.*ng-\w+=".+?".*<\/td>/g);
         if(ngDirectives != null){
           for(var i = 0; i < ngDirectives.length; ++i){
             var dir = ngDirectives[i];
@@ -672,13 +695,15 @@ pitDirectives.directive('pitGrid', ['$http','$compile','$log','utilities',functi
               var attrVal = dir.match(/ng-\w+="(.+?)"/);
               if(attrVal.length > 1){
                 attrVal = attrVal[1];
-                var nsVal = attrVal.replace(/(\w+)/g, 'row.$1');
+                var nsVal = attrVal.replace(/([\$\w]+)/, 'row.$1');
                 var nsDir = dir.replace(attrVal, nsVal);
                 htmlTemplate = htmlTemplate.replace(dir, nsDir);
               }
             }
           }
         }
+
+        htmlTemplate = htmlTemplate.replace('pit-grid-groupspan', 'pit-grid-groupspan ng-hide="row.groupspanhide" rowspan="{{row.rowspan}}"')
         
         // Wrap the template in a managable structure
         htmlTemplate = $(
@@ -718,7 +743,10 @@ pitDirectives.directive('pitGrid', ['$http','$compile','$log','utilities',functi
         }
 
         if(angular.isDefined(attrs.pitGridRowSelect)){
-          htmlTemplate.find('tbody tr').attr('ng-click', 'onRowSelected($event, row)');
+          var rows = htmlTemplate.find('tbody tr');
+          var existing = htmlTemplate.find('tbody tr').attr('ng-click');
+          rows.attr('ng-click', 'onRowSelected($event, row)' + (!!existing ? '; ' + existing : ''));
+          rows.css('height', $scope.rowHeight + 'px');
         }
 
         // change table layout to use fixed left columns
@@ -737,7 +765,7 @@ pitDirectives.directive('pitGrid', ['$http','$compile','$log','utilities',functi
 
             var sortState = $scope.sortRows($th.attr('pit-grid-sort-source'), $th.attr('pit-grid-sort-data-type'));
 
-            var $state = $('<span class="pit-grid-sortstate glyphicon"></span>');
+            var $state = $('<span class="pit-grid-sortstate glyphicon" style="width: 16px; margin-left: 2px;"></span>');
 
             if(sortState == 'asc'){
               $state.addClass('glyphicon-sort-by-attributes pit-grid-sorting-asc')
@@ -752,7 +780,7 @@ pitDirectives.directive('pitGrid', ['$http','$compile','$log','utilities',functi
           });
 
           htmlTemplate.find('th[pit-grid-sort-source]')
-                    .append('<span class="pit-grid-sortstate glyphicon glyphicon-sort pit-grid-sorting-none"></span>');
+                    .append('<span class="pit-grid-sortstate glyphicon glyphicon-sort pit-grid-sorting-none" style="width: 16px; margin-left: 2px;"></span>');
         }
 
         if($scope.renderMode == 'paged' || $scope.renderMode == 'page'){
@@ -783,11 +811,11 @@ pitDirectives.directive('pitGrid', ['$http','$compile','$log','utilities',functi
 
         htmlTemplate.find('table').attr('ng-style', 'tbodyStyle');
 
-        if(angular.isDefined(attrs.pitGridLoadingProperty)){
-          var tblLoader = $('<div pit-overlay ng-show="'+attrs.pitGridLoadingProperty+'" style="cursor:wait;"></div>');
+        if(angular.isDefined($scope.isLoading)){
+          var tblLoader = $('<div pit-overlay ng-show="isLoading" style="cursor:wait;"></div>');
 
-          if(angular.isDefined(attrs.pitGridLoadingTemplate) && $($scope.$eval(attrs.pitGridLoadingTemplate)).length > 0){
-            tblLoader.append($scope.$eval(attrs.pitGridLoadingTemplate));
+          if(angular.isDefined($scope.loadingTemplate)){
+            tblLoader.append($scope.loadingTemplate);
           }else{
             tblLoader.append('<div style="text-align:center;"><h1>Loading...</h1></div>');
           }
@@ -799,13 +827,13 @@ pitDirectives.directive('pitGrid', ['$http','$compile','$log','utilities',functi
           .then(function(){
             $scope.tableDom = $compile(htmlTemplate)($scope);
             el.append($scope.tableDom);
-
             var  $container = $scope.tableDom.find('div.pit-grid-container')
                 ,$tables = $container.find('table')
                 ,$fixedColTable = $tables.filter('.fixedColumnTable')
                 ,$mainTable = $tables.filter('.mainTable')
-                ,$scrollContainer = $scope.$scrollContainer = ($mainTable.length > 0 ? $mainTable.parent() : $container);                
+                ,$scrollContainer = $scope.$scrollContainer = ($mainTable.length > 0 ? $mainTable.parent() : $container);
 
+            $scrollContainer.addClass('scrollContainer');
             $tables.find('thead').addClass('pit-grid-header');
 
             // add fixed header and set fixed widths
