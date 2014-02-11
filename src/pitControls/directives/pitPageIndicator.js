@@ -109,7 +109,7 @@ var PageIndicatorController = function($scope, $element, $attrs, $log){
 }
 
 pitDirectives.directive('pitPageIndicator', function(){
-      template =  '<ul class="pagination">'+
+  var  template =  '<ul class="pagination">'+
                     '<li class="pagination-prev"><a href="#" ng-click="prevPage($event)">&laquo;</a></li>'+
                     '<li ng-repeat="page in pages" class="pagination-page" ng-class="getClass(page)"><a href="#" ng-click="pageChangeHandler(page.index,$event)">{{page.index+1}}</a></li>'+
                     '<li class="pagination-next"><a href="#" ng-click="nextPage($event)">&raquo;</a></li>'+
