@@ -1,7 +1,7 @@
 <table ng-controller="TableCtrl" class="table table-bordered">
   <thead>
     <tr>
-      <th></th>
+      <th><input type="checkbox" ng-change="toggleSelectAll()" ng-model="allSelected"/></th>
       <th pit-grid-sort-source="Barcode" pit-grid-sort-data-type="number" pit-grid-fixed-column>Barcode</th>
       <th pit-grid-fixed-column>Insp Lot</th>
       <th pit-grid-fixed-column>asd</th>
@@ -19,7 +19,7 @@
   </thead>
   <tbody>
     <tr ng-controller="RowCtrl"><!--   ng-repeat="row in rows | filter:isRowHidden"> -->
-      <td><input type="checkbox" ng-checked="selected" ng-click="selected = !selected"/></td>
+      <td pit-grid-groupspan><input type="checkbox" ng-checked="selected" ng-click="selected = !selected"/></td>
       <td pit-trim-leading-zeros>{{Barcode}}</td>
       <td pit-trim-leading-zeros>{{INSPLOT}}</td>
       <td>{{realIndex}}</td>

@@ -5,7 +5,7 @@ app.controller('MainCtrl', function($scope, $http, $timeout) {
   $scope.visibleRows = [];
   $scope.loading = true;
 
-  $scope.loaderTemplate = '<h1>plx w41t ..!.. </h3>';
+  $scope.loaderTemplate = '<h3>plx w41t ..!.. </h3>';
 
   $timeout(function(){
     $http.get('data.json')
@@ -31,6 +31,15 @@ app.controller('MainCtrl', function($scope, $http, $timeout) {
 app.controller('TableCtrl', function($scope, $http, $timeout){
   $scope.isRowHidden = function(row){
     return row.HIDDEN_ROW !== 'true' && row.DISHINDEX !== '---';
+  }
+
+  $scope.toggleSelectAll = function(){
+    $scope.allSelected = !$scope.allSelected;
+    $scope.apply(function(){
+      angular.forEach($scope.rows, function(value, key){
+        row.selected = $scope.allSelected;
+      });
+    });
   }
 });
 
