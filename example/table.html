@@ -20,8 +20,8 @@
   <tbody>
     <tr ng-controller="RowCtrl"><!--   ng-repeat="row in rows | filter:isRowHidden"> -->
       <td pit-grid-groupspan><input type="checkbox" ng-checked="selected" ng-click="selected = !selected"/></td>
-      <td pit-trim-leading-zeros>{{Barcode}}</td>
-      <td pit-trim-leading-zeros>{{INSPLOT}}</td>
+      <td pit-grid-groupspan pit-trim-leading-zeros>{{Barcode}}</td>
+      <td pit-grid-groupspan pit-trim-leading-zeros>{{INSPLOT}}</td>
       <td>{{realIndex}}</td>
       <td>{{realIndex}}</td>
       <td>{{MSTR_CHAR}}</td>

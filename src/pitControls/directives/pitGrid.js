@@ -566,14 +566,16 @@ pitDirectives.directive('pitGrid', ['$http','$compile','$log','utilities',functi
   }
 
   function fixedHeadingStyle(fromElement, index){
-    var w = $(fromElement).outerWidth();
+    fromElement = $(fromElement);
+    var w = fromElement.outerWidth();
     var css = {
         'width': w,
         'min-width': w,
         'max-width': w,
-        'cursor': $(fromElement).css('cursor'),
+        'cursor': fromElement.css('cursor'),
         'overflow': 'hidden',
-        'text-overflow': 'ellipsis'
+        'text-overflow': 'ellipsis',
+        'border': fromElement.css('border')
     };
 
     return css;
@@ -703,7 +705,7 @@ pitDirectives.directive('pitGrid', ['$http','$compile','$log','utilities',functi
           }
         }
 
-        htmlTemplate = htmlTemplate.replace('pit-grid-groupspan', 'pit-grid-groupspan ng-hide="row.groupspanhide" rowspan="{{row.rowspan}}"')
+        htmlTemplate = htmlTemplate.replace(/pit-grid-groupspan/g, 'pit-grid-groupspan ng-hide="row.groupspanhide" rowspan="{{row.rowspan}}"')
         
         // Wrap the template in a managable structure
         htmlTemplate = $(
@@ -784,7 +786,7 @@ pitDirectives.directive('pitGrid', ['$http','$compile','$log','utilities',functi
         }
 
         if($scope.renderMode == 'paged' || $scope.renderMode == 'page'){
-          htmlTemplate.find('.pit-grid-container').append('<div pit-page-indicator="totalPages" pit-page-indicator-click="renderRows" style="float:right;"></div>')
+          htmlTemplate.find('.pit-grid-container').after('<div pit-page-indicator="totalPages" pit-page-indicator-click="renderRows" style="float:right;"></div>')
         }
 
         htmlTemplate.find('table tbody').each(function(i,tbody){
@@ -850,6 +852,14 @@ pitDirectives.directive('pitGrid', ['$http','$compile','$log','utilities',functi
                 var baseOffsetLeft = 0;
                 var containerOffsetLet = $container.offset().left;
                 var cellIndex = 0;
+
+                var maxHeadingHeight = (function(){
+                  var headings = $tables.find('th');
+                  var first = headings.first().outerHeight();
+                  var last = headings.last().outerHeight();
+                  return (first > last ? first : last);
+                })();
+
                 // For each table available, add a header. This will add a fixed header to the fixed columns table as well, if present
                 $tables.each(function(i,table){
                   var  $table = $(table)
@@ -860,7 +870,11 @@ pitDirectives.directive('pitGrid', ['$http','$compile','$log','utilities',functi
 
                   // Get the widths of eacn header, and add a div with the same dimensions to the fixed header
                   $headings.each(function (i, e) {
-                    var $fixedCell = $(e).clone();
+                    // Set the maxHeadingHeight to existing th's as well, to align everything properly!
+                    var $fixedCell = $(e)
+                                      .css('height', maxHeadingHeight)
+                                      .clone();
+
                     var css = fixedHeadingStyle(e, i);
 
                     $fixedCell.css(css);
@@ -964,14 +978,18 @@ pitDirectives.directive('pitGrid', ['$http','$compile','$log','utilities',functi
           });
       }
 
-      var template = attrs.pitGridTemplate;
+      var template = $scope.template || attrs.pitGridTemplate;
+      if(angular.isUndefined(template)){
+        console.error('Template was undefined');
+        return;
+      }
       if(template.match(/\.(irpt|html)/) != null){
         // Manually retreive and compile the template.
         // Do this to avoid directives in the template to be compiled before the actual table
         $http.get(template)
           .success(processTemplate);
       }else{
-        processTemplate($scope.$eval(template));
+        processTemplate(template);
       }
     }
   }

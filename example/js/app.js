@@ -5,6 +5,8 @@ app.controller('MainCtrl', function($scope, $http, $timeout) {
   $scope.visibleRows = [];
   $scope.loading = true;
 
+  $scope.gridTemplate = 'table.html';
+
   $scope.loaderTemplate = '<h3>plx w41t ..!.. </h3>';
 
   $timeout(function(){
