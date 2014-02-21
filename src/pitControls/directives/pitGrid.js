@@ -109,6 +109,24 @@ pitDirectives.directive('pitGrid', ['$http','$compile','$log','utilities',functi
       row.pitGridClassNames = classNames;
     }
 
+    $scope.hoverRow = function(row, isHover){
+      if($scope.isScrolling)
+        return;
+
+      row.pitGridClassNames["pit-grid-row-hover"] = isHover;
+    }
+
+    var scrollTimeout;
+    $scope.$watch('isScrolling', function(){
+      if(!$scope.isScrolling)
+        return;
+
+      $timeout.cancel(scrollTimeout);
+      scrollTimeout = $timeout(function(){
+        $scope.isScrolling = false;
+      }, 50);
+    });
+
     var sortedBy = [];
     $scope.sortPrimers = {
        'number': parseInt
@@ -679,6 +697,7 @@ pitDirectives.directive('pitGrid', ['$http','$compile','$log','utilities',functi
     scope: {
       template: "=pitGridTemplate",
       dataSource: "=pitGridDataSource",
+      filter: "=?pitGridFilter",
       isLoading: "=?pitGridLoadingProperty",
       loadingTemplate: "=?pitGridLoadingTemplate",
       extEditable: "=?pitGridEditable",
@@ -797,8 +816,8 @@ pitDirectives.directive('pitGrid', ['$http','$compile','$log','utilities',functi
           };
 
           if(angular.isDefined(attrs.pitGridRowHoverHighlight)){
-            rowAttrs['ng-mouseenter'] = 'row.pitGridClassNames["pit-grid-row-hover"] = true;';
-            rowAttrs['ng-mouseleave'] = 'row.pitGridClassNames["pit-grid-row-hover"] = false;';
+            rowAttrs['ng-mouseenter'] = 'hoverRow(row,true)';
+            rowAttrs['ng-mouseleave'] = 'hoverRow(row,false)';
           }
 
           if(angular.isDefined(attrs.pitGridRowColorOdds) || (angular.isDefined(attrs.pitGridRowGrouping) && attrs.pitGridRowGrouping === 'odd')){
@@ -968,8 +987,8 @@ pitDirectives.directive('pitGrid', ['$http','$compile','$log','utilities',functi
 
             if($scope.renderMode == 'scroll' || $scope.renderMode == 'virtual')
               $scrollContainer.bind('scroll', function(){
-                //$scope.renderRows();
                 $scope.$apply(function(){
+                  $scope.isScrolling = true;
                   $scope.scrollTop = $scrollContainer.scrollTop();
                 });
               });
